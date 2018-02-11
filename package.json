@@ -1,0 +1,41 @@
+{
+  "name": "ndzserver",
+  "version": "1.0.0",
+  "description": "Servidor para criação de uma comunidade segura e inovadora",
+  "scripts": {
+    "start": "nodemon ./bin/www.js",
+    "build": "webpack --watch --colors",
+    "prod": "webpack -p --watch --colors"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "GuilhermeSantos",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "cookie-parser": "^1.4.3",
+    "cryptr": "^2.0.0",
+    "debug": "^3.1.0",
+    "express": "^4.16.2",
+    "ftp": "^0.3.10",
+    "jquery": "^3.3.1",
+    "lz-string": "^1.4.4",
+    "mongodb": "^3.0.2",
+    "mongoose": "^4.13.11",
+    "morgan": "^1.9.0",
+    "nodemailer": "^4.4.2",
+    "nodemon": "^1.14.12",
+    "optimist": "^0.6.1",
+    "pug-cli": "^1.0.0-alpha6",
+    "serve-favicon": "^2.4.5",
+    "socket.io": "^2.0.4",
+    "webpack": "^3.10.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.1"
+  }
+}

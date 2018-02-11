@@ -1,0 +1,24 @@
+{
+    "en_us": {
+        "subject": [
+            "Account created ✔"
+        ],
+        "text": [
+            "Thanks for playing"
+        ],
+        "html": [
+            "<b>You did the part of beta</b>"
+        ]
+    },
+    "pt_br": {
+        "subject": [
+            "Conta criada ✔"
+        ],
+        "text": [
+            "Obrigado por jogar"
+        ],
+        "html": [
+            "<b>Você fez parte da beta</b>"
+        ]
+    }
+}

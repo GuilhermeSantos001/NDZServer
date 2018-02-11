@@ -1,0 +1,4 @@
+"Service","Username","Password","Hostname","Port","Security"
+"SMTP","yys6bpxgij7fkht4@ethereal.email","Ux5AMt7PesuKP7Qp5N","smtp.ethereal.email",587,"STARTTLS"
+"IMAP","yys6bpxgij7fkht4@ethereal.email","Ux5AMt7PesuKP7Qp5N","imap.ethereal.email",993,"TLS"
+"POP3","yys6bpxgij7fkht4@ethereal.email","Ux5AMt7PesuKP7Qp5N","pop3.ethereal.email",995,"TLS"
