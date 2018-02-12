@@ -10,14 +10,14 @@
 - [Instale o mongoDB](https://github.com/GuilhermeSantos001/NDZServer/wiki/Instalar-o-MongoDB)
 
 - Instalar o NDZServer
-    - Baixar: git clone
+    - Baixar: git clone https://github.com/GuilhermeSantos001/NDZServer.git
     - Instalar: npm install
     - Executar: npm start
 
 # Suporte
 > O servidor está todo documentado, qualquer duvida crie um issue aqui no github!
 
-- Você pode acompanhar a documentação para aprender mais sobre o NDZServer
+- Você pode acompanhar a [documentação](https://github.com/GuilhermeSantos001/NDZServer/wiki) para aprender mais sobre o NDZServer
 
 # Idioma
 > O NDZServer é totalmente feito em Português-BR.
