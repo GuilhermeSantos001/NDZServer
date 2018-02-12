@@ -2,7 +2,7 @@
 > Servidor para criação de uma comunidade segura e inovadora. NDZServer utiliza o socket.io para estabelecer diversas conexões. A utilização do MongoDB para uma organização moderna. Criar uma comunidade agora é divertido com o NDZServer, experimente agora!
 
 # Como instalar
-> Para instalar o NDZServer você precisa do node.js, mongoDB e um servidor SMTP
+> Para instalar o NDZServer você precisa do **node.js**, **Git**, **mongoDB** e um servidor **SMTP**
 
 - Antes de instalar o NDZServer, instale o [node.js](https://nodejs.org/en/) e o [Git](https://git-scm.com/downloads)
 - A instação do NDZServer pode demorar alguns minutos
