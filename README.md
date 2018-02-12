@@ -4,7 +4,7 @@
 # Como instalar
 > Para instalar o NDZServer você precisa do node.js, mongoDB e um servidor SMTP
 
-- Antes de instalar o NDZServer, instale o [node.js](https://nodejs.org/en/)
+- Antes de instalar o NDZServer, instale o [node.js](https://nodejs.org/en/) e o [Git](https://git-scm.com/downloads)
 - A instação do NDZServer pode demorar alguns minutos
 
 - [Instale o mongoDB](https://github.com/GuilhermeSantos001/NDZServer/wiki/Instalar-o-MongoDB)
