@@ -7,6 +7,8 @@
 - Antes de instalar o NDZServer, instale o node.js
 - A instação do NDZServer pode demorar alguns minutos
 
+- [Instale o mongoDB](https://github.com/GuilhermeSantos001/NDZServer/wiki/Instalar-o-MongoDB)
+
 - Instalar o NDZServer
     - Baixar: git clone
     - Instalar: npm install
