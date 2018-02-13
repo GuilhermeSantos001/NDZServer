@@ -10,20 +10,6 @@ var userIp;
 getIP();
 
 /**
- * @description Coloca 0 na frente da string enquanto a string for menor que a
- * quantia de 0 indicada
- * @param {string} string valor indicado para colocar o 0 a frente desse valor
- * @param {number} length Quantidade de 0 indicada
- */
-var padZero = function (string, length) {
-    var s = string.toString();
-    while (s.length < length) {
-        s = '0' + s;
-    }
-    return s;
-};
-
-/**
  * Cria uma conexão com o servidor principal
  */
 function connectToMainServer() {
@@ -45,6 +31,10 @@ function connectToMainServer() {
     socket.on('connect_account', onConnectAccount);
     socket.on('account_exist', onAccountExist);
     socket.on('account_noExist', onAccountNoExist);
+    socket.on('account_existRequestLogin', onAccountExistRequestLogin);
+    socket.on('account_email', onAccountEmail);
+    socket.on('noLogin_modal_3', onNoLoginModal3);
+    socket.on('noLogin_modal_4', onNoLoginModal4);
 
     function onConnect(evt) {
         console.info("Autenticação com o servidor foi um sucesso!");
@@ -79,7 +69,7 @@ function connectToMainServer() {
             accountEmail = String(data.email);
         $("#accountUserName").text(username);
         $("#accountUserMoney").html(`<i class="material-icons blue-text" style="font-size: 22px;">monetization_on</i> \
-        ${padZero(money.toString(), 9)}`);
+        ${money.toString()}`);
         $("#btnConfiguraçõesDePerfil").removeClass("disabled");
         var ls = localStorage;
         ls.setItem('NDZServer', LZString.compressToBase64(JSON.stringify({
@@ -94,6 +84,35 @@ function connectToMainServer() {
 
     function onAccountNoExist() {
         accountNoExist();
+    };
+
+    function onAccountExistRequestLogin() {
+        Materialize.toast('<span>Você já tem uma conta no seu endereço de IP</span>', 5000, 'rounded');
+        buttonLoginAccount();
+    };
+
+    function onAccountEmail(content) {
+        if (!content && typeof content != 'string' ||
+            typeof content === 'string' && content.length <= 0) {
+            return;
+        }
+        var data = JSON.parse(LZString.decompressFromEncodedURIComponent(content)) || {};
+        var accountEmail = String(data.email);
+        setAccountLoginEmail(accountEmail);
+    };
+
+    function onNoLoginModal3() {
+        setTimeout(() => {
+            Materialize.toast('<span>Não foi possível acessar sua conta, a senha está errada!</span>', 5000, 'rounded');
+            $("#modal_3").modal('open');
+        }, 200);
+    };
+
+    function onNoLoginModal4() {
+        setTimeout(() => {
+            Materialize.toast('<span>Não foi possível acessar sua conta, seu email ou senha estão errados!</span>', 5000, 'rounded');
+            $("#modal_4").modal('open');
+        }, 200);
     };
 };
 
@@ -210,7 +229,7 @@ function accountExist() {
     var data = null;
     if (ls.getItem('NDZServer')) {
         data = JSON.parse(LZString.decompressFromBase64(ls.getItem('NDZServer')))
-    }    
+    }
     if (data) {
         var accountIP = String(data.accountIP);
         var accountEmail = String(data.accountEmail);
@@ -229,7 +248,7 @@ function accountNoExist() {
     var data = null;
     if (ls.getItem('NDZServer')) {
         data = JSON.parse(LZString.decompressFromBase64(ls.getItem('NDZServer')))
-    } 
+    }
     if (data) {
         ls.removeItem('NDZServer');
     }
@@ -245,7 +264,7 @@ function scriptStart(ip) {
 };
 
 /**
- * Configura a tela de requisição de login
+ * Configura a estrutura de modals
  */
 $(document).ready(function () {
     $('.modal').modal({
@@ -312,14 +331,14 @@ function passwordValidation() {
             $("#icon_prefix_3, #icon_prefix_4").removeClass("invalid").addClass("valid");
             $("#input_passwordDeUsuario, #input_passwordDeUsuario2").removeClass("grey-text").addClass("green-text");
         } else {
-            $("#icon_prefix_3, #icon_prefix_4").removeClass("valid").removeClass("invalid");
+            $("#icon_prefix_3, #icon_prefix_4").removeClass("valid invalid");
         }
     } else {
         $("#input_passwordDeUsuario, #input_passwordDeUsuario2").removeClass("green-text").addClass("grey-text");
         if ($("#icon_prefix_3").val().length > 8 && $("#icon_prefix_4").val().length > 8) {
             $("#icon_prefix_3, #icon_prefix_4").removeClass("valid").addClass("invalid");
         } else {
-            $("#icon_prefix_3, #icon_prefix_4").removeClass("valid").removeClass("invalid");
+            $("#icon_prefix_3, #icon_prefix_4").removeClass("valid invalid");
         }
     }
 };
@@ -378,3 +397,154 @@ $("#btnSalvarAccount").click(() => {
         socket.emit('createAccount', accountData);
     }
 });
+
+/**
+ * Evento para mostrar a senha na hora de confirmar o cadastro
+ */
+var passwordShow2 = null;
+$("#input_passwordDeUsuarioShow2").click(() => {
+    if (!passwordShow2) {
+        passwordShow2 = true;
+        $("#icon_prefix_6").attr('type', 'text');
+        $("#input_passwordDeUsuarioShow2").removeClass("grey-text").addClass("green-text").text('visibility_off');
+    } else {
+        passwordShow2 = null;
+        $("#icon_prefix_6").attr('type', 'password');
+        $("#input_passwordDeUsuarioShow2").removeClass("green-text").addClass("grey-text").text('visibility');
+    }
+});
+
+/**
+ * Evento para salvar a senha na hora de confirmar o cadastro
+ */
+$("#icon_prefix_6").keyup(() => {
+    if ($("#icon_prefix_6").val().length > 8) {
+        $("#icon_prefix_6").addClass('valid');
+        $("#btnConfirmPassword").removeClass('disabled');
+        $("#iconConfirmPassword").removeClass('grey-text').addClass('green-text');
+    } else {
+        $("#icon_prefix_6").removeClass('valid');
+        $("#btnConfirmPassword").addClass('disabled');
+        $("#iconConfirmPassword").removeClass('green-text').addClass('grey-text');
+    }
+});
+
+/**
+ * Botão para logar na conta
+ */
+function buttonLoginAccount() {
+    $("#modal_4").modal('open');
+};
+
+/**
+ * Configura os Tooltips
+ */
+$(document).ready(function () {
+    $('.tooltipped').tooltip({
+        delay: 100
+    });
+});
+
+/**
+ * Evento para recuperar o email da conta
+ */
+var requestLoginEmail = null;
+$("#getLoginEmail").click(() => {
+    var accountData = LZString.compressToEncodedURIComponent(JSON.stringify({
+        accountIP: userIp
+    }));
+    socket.emit('emailAccount', accountData);
+});
+
+function setAccountLoginEmail(email) {
+    $("#iconLoginEmail").removeClass('grey-text').addClass('green-text');
+    $('#icon_prefix_7').val(email).removeClass('validate invalid').addClass('valid').attr('disabled', true);
+    $("#getLoginEmail").removeClass('grey-text').addClass('green-text').text('mail');
+    requestLoginEmail = true;
+};
+
+/**
+ * Evento do botão para logar na conta
+ */
+$("#icon_prefix_7").keyup(() => {
+    btnLoginAccountIsValid();
+}).focusout(() => {
+    btnLoginAccountIsValid();
+});
+
+$("#icon_prefix_8").keyup(() => {
+    btnLoginAccountIsValid();
+}).focusout(() => {
+    btnLoginAccountIsValid();
+});
+
+function btnLoginAccountIsValid() {
+    var email = $("#icon_prefix_7").hasClass('valid'),
+        password = $("#icon_prefix_8").val().length > 8;
+    if (email && password) {
+        $("#btnConfirmPassword2").removeClass('disabled');
+    } else {
+        $("#btnConfirmPassword2").addClass('disabled');
+    }
+    if (email) {
+        $("#iconLoginEmail").removeClass('grey-text').addClass('green-text');
+        $("#icon_prefix_7").addClass('valid');
+    } else {
+        if (!requestLoginEmail) {
+            $("#iconLoginEmail").removeClass('green-text').addClass('grey-text');
+            $("#icon_prefix_7").removeClass('valid');
+        }
+    }
+    if (password) {
+        $("#iconConfirmPassword2").removeClass('grey-text').addClass('green-text');
+        $("#icon_prefix_8").addClass('valid');
+    } else {
+        $("#iconConfirmPassword2").removeClass('green-text').addClass('grey-text');
+        $("#icon_prefix_8").removeClass('valid');
+    }
+};
+
+/**
+ * Evento para mostrar a senha para logar na conta
+ */
+var passwordShow3 = null;
+$("#input_passwordDeUsuarioShow3").click(() => {
+    if (!passwordShow3) {
+        passwordShow3 = true;
+        $("#icon_prefix_8").attr('type', 'text');
+        $("#input_passwordDeUsuarioShow3").removeClass("grey-text").addClass("green-text").text('visibility_off');
+    } else {
+        passwordShow3 = null;
+        $("#icon_prefix_8").attr('type', 'password');
+        $("#input_passwordDeUsuarioShow3").removeClass("green-text").addClass("grey-text").text('visibility');
+    }
+});
+
+/**
+ * Botão para cancelar o login na conta
+ */
+$("#btnCancelLoginAccount").click(() => {
+    $('#modal_1').modal('open');
+});
+
+/**
+ * Requisição para logar na conta
+ */
+function requestLoginAccount(requestIndex, callbackSocket, callbackSocketError) {
+    if (connectToMainServerIsRunning()) {
+        if (requestIndex == '1') {
+            var prefix_1 = $("#icon_prefix_7").val(),
+                prefix_2 = $("#icon_prefix_8").val();
+        } else if (requestIndex == '2') {
+            var prefix_1 = $("#icon_prefix_5").val(),
+                prefix_2 = $("#icon_prefix_6").val();
+        }
+        var accountData = LZString.compressToEncodedURIComponent(JSON.stringify({
+            email: prefix_1,
+            password: prefix_2,
+            callbackSocket: callbackSocket,
+            callbackSocketError: callbackSocketError
+        }));
+        socket.emit('loginAccount', accountData);
+    }
+};
