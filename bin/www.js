@@ -1,5 +1,5 @@
 /**
- * Module dependencies.
+ * Principais modulos.
  */
 
 var app = require('../app.js');
@@ -7,14 +7,14 @@ var debug = require('debug')('myapp:server');
 var http = require('http');
 
 /**
- * Get port from environment and store in Express.
+ * Porta do servidor
  */
 
 var port = normalizePort(process.env.PORT || '9876');
 app.set('port', port);
 
 /**
- * Create HTTP and SOCKET.IO server.
+ * Cria o HTTP para o servidor SOCKET.IO.
  */
 const server = require('http').createServer(app);
 
@@ -30,7 +30,7 @@ const serverMainIO = require('socket.io')(server, {
 });
 
 /**
- * Listen on provided port, on all network interfaces.
+ * Ouça na porta fornecida, em todas as interfaces de rede.
  */
 
 server.listen(port, onReady);
@@ -38,19 +38,17 @@ server.on('error', onError);
 server.on('listening', onListening);
 
 /**
- * Normalize a port into a number, string, or false.
+ * Normalize uma porta em um número, string ou falso.
  */
 
 function normalizePort(val) {
   var port = parseInt(val, 10);
 
   if (isNaN(port)) {
-    // named pipe
     return val;
   }
 
   if (port >= 0) {
-    // port number
     return port;
   }
 
@@ -58,7 +56,7 @@ function normalizePort(val) {
 }
 
 /**
- * Event listener for HTTP server "error" event.
+ * Evento "error" do servidor HTTP.
  */
 
 function onError(error) {
@@ -70,14 +68,13 @@ function onError(error) {
     'Pipe ' + port :
     'Port ' + port;
 
-  // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
+      console.error(bind + ' requer privilégios elevados');
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
+      console.error(bind + ' já está em uso');
       process.exit(1);
       break;
     default:
@@ -86,7 +83,7 @@ function onError(error) {
 }
 
 /**
- * Event listener for HTTP server "listening" event.
+ * Evento "listening" do servidor HTTP.
  */
 
 function onListening() {

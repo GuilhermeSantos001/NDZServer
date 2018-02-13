@@ -41,8 +41,6 @@ var padZero = function (string, length) {
  * @private Restrito ao escopo global
  * @description Retorna um texto, uma data completa, dia da semana, dia do 
  * mes, mes, ano e hora
- * @param {string} string valor indicado para colocar o 0 a frente desse valor
- * @param {number} length Quantidade de 0 indicada
  * @author GuilhermeSantos
  * @version 1.0.0
  */
@@ -83,7 +81,7 @@ var dateNow = function () {
 
 /**
  * @private Restrito ao escopo global
- * @type {{}}
+ * @type object
  * @description Cria uma instancia da classe Schema
  * @default new Schema({})
  */
@@ -98,46 +96,21 @@ var usersSchema = new Schema({
     password: {
         type: String,
         trim: true,
-        required: [true, '{PATH} este campo é obrigatório para sua segurança']
+        required: [true, '{PATH} este campo é obrigatório para sua segurança'],
+        minlength: [8, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).']
     },
     username: {
         type: String,
         trim: true,
         required: [true, '{PATH} este campo é obrigatório'],
         maxlength: [20, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento maximo permitido ({MAXLENGTH}).'],
-        minlength: [8, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).']
-    },
-    familyName: {
-        type: String,
-        trim: true,
-        unique: true,
-        required: [true, '{PATH} este campo é obrigatório'],
-        maxlength: [20, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento maximo permitido ({MAXLENGTH}).'],
-        minlength: [6, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).']
-    },
-    lifestyle: {
-        type: String,
-        trim: true,
-        required: [true, '{PATH} este campo é obrigatório'],
-        enum: {
-            values: ['Noobie', 'Survivor', 'Trader', 'Gangster', 'Athletic', 'Nerd'],
-            message: '`{PATH}` não tem um valor valido `{VALUE}`'
-        }
+        minlength: [2, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).']
     },
     money: {
         type: Number,
         max: [99999, 'O valor do caminho `{PATH}` ({VALUE}) é maior que o maximo permitido ({MAX}).'],
         min: [0, 'O valor do caminho `{PATH}` ({VALUE}) é menor que o minimo permitido ({MIN}).'],
         required: [true, '{PATH} este campo é obrigatório']
-    },
-    fameFamily: {
-        type: String,
-        trim: true,
-        required: [true, '{PATH} este campo é obrigatório']
-    },
-    spawnCity: {
-        type: Array,
-        default: ['Blocks', 1]
     },
     level: {
         type: Number,
@@ -150,6 +123,12 @@ var usersSchema = new Schema({
         type: String,
         trim: true,
         default: dateNow()
+    },
+    accountIP: {
+        type: String,
+        unique: true,
+        trim: true,
+        require: [true, '{PATH} este campo é obrigatório']
     },
     accountCode: {
         type: String,
@@ -179,4 +158,6 @@ var Users = mongoose.model('users', usersSchema);
 //================================================================================
 // MODULO PARA EXPORTAR O SCRIPT
 //================================================================================
-module.exports = Users;
+module.exports = {
+    Users: Users
+};

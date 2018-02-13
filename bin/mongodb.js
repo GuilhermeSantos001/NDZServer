@@ -13,10 +13,20 @@ var mongoose = require('mongoose');
 /**
  * @private Restrito ao escopo global
  * @type {{}}
- * @description Importa o modulo para criar o Schema de usuarios
- * @default require('../models/users')
+ * @description Importa as configurações do mongoDB
+ * @default require('../configs/mongodb')
  */
-var Schema_users = require('../models/users');
+var configMongoDB = require('../configs/mongodb') || {
+    "user": {}
+};
+
+/**
+ * @private Restrito ao escopo global
+ * @type {{}}
+ * @description Importa o modulo para criar o Schema de usuarios
+ * @default require('../models/users').Users
+ */
+var Schema_users = require('../models/users').Users;
 
 /**
  * @private Restrito ao escopo global
@@ -64,7 +74,7 @@ mongoose.Promise = global.Promise;
  * @description Endereço de DNS do mongoDB
  * @default 'mongodb://admin:_master=Admin2017@localhost:30000/ndzserver'
  */
-var uri = 'mongodb://admin:_master=Admin2017@localhost:30000/ndzserver';
+var uri = `mongodb://${configMongoDB.user.name}:${configMongoDB.user.password}@${configMongoDB.address}:${configMongoDB.port}/${configMongoDB.db}`;
 
 /**
  * @private Restrito ao escopo global
@@ -78,8 +88,7 @@ var options = {
     reconnectTries: Number.MAX_VALUE, // Nunca pare de tentar se reconectar
     reconnectInterval: 500, // Reconecte-se a cada 500ms
     poolSize: 10, // Mantenha até 10 conexões de soquete, ou seja passou disso, mantenha o restante na fila
-    // Se não estiver conectado, devolva os erros imediatamente ao invés de aguardar a ligação novamente
-    bufferMaxEntries: 0
+    bufferMaxEntries: 0 // Se não estiver conectado, devolva os erros imediatamente ao invés de aguardar a ligação novamente
 };
 
 //================================================================================
@@ -277,23 +286,31 @@ process.on('SIGINT', function () {
 /**
  * @description Se o socket estabelecer uma conexão
  */
-serversIO.playerPageIO.on('connect', (socket) => {
-    // Cria a chamada para criar a conta
+serversIO.serverMainIO.on('connect', (socket) => {
+    // Faz uma requisição para a criação de conta
     socket.on('createAccount', (content) => {
         if (!content && typeof content != 'string' ||
             typeof content === 'string' && content.length <= 0) {
-            return drawMessageServer('Chamada para createAccount resultou um erro, pois o parametro content não é uma string', 'errorImportant');
+            return drawMessageServer('Chamada para requestLogin resultou um erro, pois o parametro content não é uma string', 'errorImportant');
         }
-        var accountContent = JSON.parse(LZString.decompressFromEncodedURIComponent(content)) || {};
-        var email = accountContent.email,
-            password = accountContent.password,
-            username = accountContent.username,
-            familyName = accountContent.familyName,
-            lifestyle = accountContent.lifestyle,
-            accountCode = accountContent.accountCode,
-            money = accountContent.money,
-            fameFamily = accountContent.fameFamily;
-        createAccount(email, password, username, familyName, lifestyle, accountCode, money, fameFamily);
+        var contentData = JSON.parse(LZString.decompressFromEncodedURIComponent(content)) || {};
+        var email = String(contentData.email),
+            password = String(contentData.password),
+            username = String(contentData.username),
+            money = Number(contentData.money),
+            accountCode = String(contentData.accountCode),
+            accountIP = String(contentData.accountIP);
+        createAccount(email, password, username, money, accountCode, accountIP);
+    });
+    // Faz uma requisição para a verificação da conta
+    socket.on('existAccount', (content) => {
+        if (!content && typeof content != 'string' ||
+            typeof content === 'string' && content.length <= 0) {
+            return drawMessageServer('Chamada para requestLogin resultou um erro, pois o parametro content não é uma string', 'errorImportant');
+        }
+        var contentData = JSON.parse(LZString.decompressFromEncodedURIComponent(content)) || {};
+        var accountIP = String(contentData.accountIP);
+        existAccount(accountIP);
     });
 });
 
@@ -304,22 +321,26 @@ serversIO.playerPageIO.on('connect', (socket) => {
  * @public Exportado pelo module.exports
  * @description Cria uma conta de usuario
  * @param {string} email Endereço de email
- * @param {string} password Senha
+ * @param {string} password Senha de usuario
  * @param {string} username Nome de usuario
- * @param {string} familyName Nome da familia
- * @param {string} lifestyle Estilo de vida
+ * @param {string} money Dinheiro do usuario
  * @param {string} accountCode Codigo de ativação da conta
+ * @param {string} accountIP IP do usuario
  * @author GuilhermeSantos
  * @version 1.0.0
  */
-function createAccount(email, password, username, familyName, lifestyle, accountCode, money, fameFamily) {
+function createAccount(email, password, username, money, accountCode, accountIP) {
     mongoose.connect(uri, options, (error, db) => {
         if (error) {
             return drawMessageServer('A tentativa de se conectar ao mongoDB falhou! ' + error, 'errorImportant');
         }
-
-        if (!email || !password || !username || !familyName || !lifestyle || !accountCode || !money || !fameFamily) {
-            drawMessageServer(`Não é possivel criar uma conta com essas configurações: ${email} ${password} ${username} ${familyName} ${lifestyle} ${accountCode} ${money} ${fameFamily}`, 'error');
+        if (typeof money == 'number') {
+            var moneyCheck = true;
+        } else {
+            var moneyCheck = false;
+        }
+        if (!email || !password || !username || !moneyCheck || !accountCode || !accountIP) {
+            drawMessageServer(`Não é possivel criar uma conta com essas configurações: ${email} ${password} ${username} ${money} ${accountCode} ${accountIP}`, 'error');
             return mongoose.connection.close();
         };
 
@@ -328,28 +349,79 @@ function createAccount(email, password, username, familyName, lifestyle, account
             email: email,
             password: LZString.compressToBase64(JSON.stringify(encryptJSON(password))),
             username: username,
-            familyName: familyName,
-            lifestyle: lifestyle,
-            accountCode: accountCode,
             money: money,
-            fameFamily: fameFamily
+            accountCode: accountCode,
+            accountIP: accountIP
         });
 
-        // Faz uma validação de dados antes de criar a conta
-        user.validate(function (err) {
+        // Faz uma verificação para ver se a conta já existe 
+        Schema_users.count({
+            accountIP: accountIP
+        }, function (err, count) {
             if (err) {
-                drawMessageServer(err.message || err, 'alert');
-                mongoose.connection.close();
-            } else {
-                // Salva o usuario no banco de dados
-                user.save(function (err) {
-                    if (err) {
-                        return drawMessageServer('Não foi possivel salvar o usuario no banco de dados, erro: ' + err, 'important');
-                    }
-                    drawMessageServer(`Usuario ${email} salvo no banco de dados`, 'success');
-                    mongoose.connection.close();
-                });
+                return drawMessageServer('Não foi possivel verificar se existe a conta no banco de dados, erro: ' + err, 'error');
             }
+            if (count > 0) {
+                drawMessageServer(`A conta no ip(${accountIP}) já existe!`, 'important');
+                return mongoose.connection.close();
+            }
+            saveAccount();
+        });
+
+        // Conclusão para adicionar a conta
+        function saveAccount() {
+            // Faz uma validação de dados antes de criar a conta
+            user.validate(function (err) {
+                if (err) {
+                    drawMessageServer(err.message || err, 'alert');
+                    mongoose.connection.close();
+                } else {
+                    // Salva o usuario no banco de dados
+                    user.save(function (err) {
+                        if (err) {
+                            return drawMessageServer('Não foi possivel salvar o usuario no banco de dados, erro: ' + err, 'important');
+                        }
+                        drawMessageServer(`Usuario ${email} salvo no banco de dados`, 'success');
+                        serversIO.serverMainIO.emit('connect_account', LZString.compressToEncodedURIComponent(JSON.stringify({
+                            email: email,
+                            password: password,
+                            username: username,
+                            money: money,
+                            accountCode: accountCode,
+                            accountIP: accountIP
+                        })));
+                        mongoose.connection.close();
+                    });
+                }
+            });
+        }
+    });
+};
+
+function existAccount(accountIP) {
+    mongoose.connect(uri, options, (error, db) => {
+        if (error) {
+            return drawMessageServer('A tentativa de se conectar ao mongoDB falhou! ' + error, 'errorImportant');
+        }
+        if (!accountIP) {
+            drawMessageServer(`Não é possivel fazer uma verificação para a conta com essas configurações: ${accountIP}`, 'error');
+            return mongoose.connection.close();
+        };
+        // Faz uma verificação para ver se a conta já existe 
+        Schema_users.count({
+            accountIP: accountIP
+        }, function (err, count) {
+            if (err) {
+                return drawMessageServer('Não foi possivel verificar se existe a conta no banco de dados, erro: ' + err, 'error');
+            }
+            if (count > 0) {
+                serversIO.serverMainIO.emit('account_exist');
+                drawMessageServer(`A conta no ip(${accountIP}) existe!`, 'success');
+            } else {
+                serversIO.serverMainIO.emit('account_noExist');
+                drawMessageServer(`A conta no ip(${accountIP}) não existe!`, 'successError');
+            }
+            return mongoose.connection.close();
         });
     });
 };
@@ -463,7 +535,7 @@ function updateAccount(email, set, unset) {
             });
         };
 
-        // Chama a função pasando uma callback
+        // Chama a função passando uma callback
         updateProps(removeProps);
     });
 };
@@ -511,7 +583,7 @@ function playerPage_loginAccount(email, password) {
                     content.spawnCity = user.spawnCity;
                     content.level = user.level;
                     content.lastLogin = user.lastLogin;
-                    serversIO.playerPageIO.emit('playerPage_LoginSuccess', LZString.compressToEncodedURIComponent(JSON.stringify(content)));
+                    serversIO.serverMainIO.emit('playerPage_LoginSuccess', LZString.compressToEncodedURIComponent(JSON.stringify(content)));
                 }
             }
             mongoose.connection.close();

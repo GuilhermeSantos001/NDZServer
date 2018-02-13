@@ -1,31 +1,350 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-  <!-- Required meta tags -->
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <!--Import Google Icon Font-->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!--Import materialize.css-->
+  <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
 
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <!--Let browser know website is optimized for mobile-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
 
 <body>
-  <!-- Content Page -->
-  <div id="pagerender" class="container-fluid">
+
+  <!-- Estrutura para a tela de requisição de login -->
+  <div id="modal_1" class="modal">
+    <div class="modal-content">
+      <h4>Sem Registros!</h4>
+      <blockquote>
+        Não foi possivel encontrar seu registro. Você tem uma conta?
+      </blockquote>
+    </div>
+    <div class="modal-footer">
+      <a class="modal-action modal-close waves-effect waves-green btn-flat">Entrar</a>
+      <a class="modal-action modal-close waves-effect waves-green btn-flat left" onclick="buttonCreateAccount()">Criar conta</a>
+    </div>
   </div>
 
-  <!-- jQuery first, then Tether, Socket.io, then Bootstrap JS. -->
-  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
-    crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
-    crossorigin="anonymous"></script>
+  <!-- Estrutura para a tela de criação de conta -->
+  <div id="modal_2" class="modal">
+    <div class="modal-content">
+      <h4>Crie sua conta</h4>
+      <div class="row">
+        <form class="col s12">
+          <div class="row">
+            <!-- Nome de usuario -->
+            <div class="input-field col s12">
+              <i id="input_nomeDeUsuario" class="material-icons prefix grey-text">assignment_ind</i>
+              <input id="icon_prefix_1" type="text">
+              <label for="icon_prefix_1">Nome de usuario</label>
+            </div>
+            <!-- Email -->
+            <div class="input-field col s12">
+              <i id="input_emailDeUsuario" class="material-icons prefix grey-text">email</i>
+              <input id="icon_prefix_2" type="email" class="validate">
+              <label for="icon_prefix_2">Email</label>
+            </div>
+            <!-- Senha -->
+            <div class="input-field col s12">
+              <i id="input_passwordDeUsuario" class="material-icons prefix grey-text">lock</i>
+              <i id="input_passwordDeUsuarioShow" class="material-icons grey-text right" style="cursor: pointer;">visibility</i>
+              <input id="icon_prefix_3" type="password">
+              <label for="icon_prefix_3">Senha</label>
+            </div>
+            <!-- Confirmar Senha -->
+            <div class="input-field col s12">
+              <i id="input_passwordDeUsuario2" class="material-icons prefix grey-text">lock</i>
+              <input id="icon_prefix_4" type="password">
+              <label for="icon_prefix_4">Confirmar Senha</label>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a id="btnSalvarAccount" class="modal-action modal-close waves-effect waves-green btn-flat left disabled">Salvar</a>
+      <a class="modal-action modal-close waves-effect waves-green btn-flat" onclick="buttonCancelCreateAccount()">Cancelar</a>
+    </div>
+  </div>
+
+  <!-- Estrutura para a tela de confirmar senha para o login -->
+  <div id="modal_3" class="modal">
+    <div class="modal-content">
+      <h4>Confirmar Registro!</h4>
+      <blockquote>
+        Encontramos seu registro, por favor, confirme sua senha
+      </blockquote>
+      <div class="row">
+        <form class="col s12">
+          <div class="row">
+            <!-- Email -->
+            <div class="input-field col s12">
+              <i class="material-icons prefix green-text">email</i>
+              <input id="icon_prefix_5" value="email@hotmail.com" type="text" class="valid" disabled>
+              <label for="icon_prefix_5">Email</label>
+            </div>
+            <!-- Senha -->
+            <div class="input-field col s12">
+              <i class="material-icons prefix grey-text">lock</i>
+              <i id="input_passwordDeUsuarioShow2" class="material-icons grey-text right" style="cursor: pointer;">visibility</i>
+              <input id="icon_prefix_6" type="password">
+              <label for="icon_prefix_6">Senha</label>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a class="modal-action modal-close waves-effect waves-green btn-flat left disabled">Confirmar</a>
+      <a class="modal-action modal-close waves-effect waves-green btn-flat">Cancelar</a>
+    </div>
+  </div>
+
+  <!-- Perfil -->
+  <div class="row" style="margin-bottom: 195px;">
+    <div class="col s12 center-align" style="margin-top: 0px; height: 90px;">
+      <img src="images/avatar_default.png" alt="" style="margin-top: 10px; width: 120px; height: 160px;">
+      <h5 id="accountUserName">Visitante</h5>
+      <h5 id="accountUserMoney">
+        <i class="material-icons blue-text" style="font-size: 22px;">monetization_on</i>
+        000000000
+      </h5>
+      <ul id="dropdown2" class="dropdown-content" style="margin-left: 25%;">
+        <li>
+          <a href="#!">Ver e Editar o seu perfil
+            <span class="badge">Mude seu perfil na comunidade</span>
+          </a>
+        </li>
+        <li>
+          <a href="#!">Mensagens
+            <span class="badge">Você tem 0 novas mensagens</span>
+          </a>
+        </li>
+      </ul>
+      <a id="btnConfiguraçõesDePerfil" class="col offset-s3 s6 waves-effect btn white blue-text dropdown-button disabled" href="#!"
+        data-activates="dropdown2">
+        <i class="material-icons left">account_circle</i>
+        <i class="material-icons right grey-text">build</i>
+        Configurações do seu perfil
+      </a>
+    </div>
+  </div>
+
+  <!-- Menu do forum -->
+  <div class="container">
+    <div class="row">
+      <div class="col offset-s2 s8 card-panel blue-text" style="margin-top: 25px;">
+        <div class="row">
+          <!-- Comunidade -->
+          <div class="col offset-s1 s10 card-panel blue white-text center-align" style="margin-top: 25px;">
+            <h5>
+              Comunidade
+            </h5>
+          </div>
+          <!-- O NDZServer -->
+          <div class="col offset-s1 s10">
+            <ul class="collapsible" data-collapsible="accordion">
+              <li>
+                <div class="collapsible-header">
+                  <i class="material-icons">redeem</i>
+                  O NDZServer
+                  <span class="badge blue-text">0 - Mensagens | 0 - Tópicos</span>
+                </div>
+                <p style="margin-top: 4px; padding: 10px;">
+                  <i class="material-icons right" style="cursor: pointer;">play_circle_outline</i>
+                  Saiba de todas as novidades e atualizações do nosso fórum aqui.
+                </p>
+                <div class="collapsible-body blue">
+                  <div class="row">
+                    <a class="col offset-s1 s10 waves-effect btn white blue-text" style="margin-top: 25px;">
+                      <i class="material-icons left">people</i>
+                      <i class="material-icons right grey-text">new_releases</i>
+                      Equipe da staff
+                    </a>
+                    <a class="col offset-s1 s10 waves-effect btn white blue-text" style="margin-top: 25px;">
+                      <i class="material-icons left">assignment_late</i>
+                      <i class="material-icons right grey-text">new_releases</i>
+                      Central de notícias
+                    </a>
+                    <a class="col offset-s1 s10 waves-effect btn white blue-text" style="margin-top: 25px;">
+                      <i class="material-icons left">feedback</i>
+                      <i class="material-icons right grey-text">new_releases</i>
+                      Apresentações e Despedidas
+                    </a>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <!-- Feedback e Bugs -->
+          <div class="col offset-s1 s10">
+            <ul class="collapsible" data-collapsible="accordion">
+              <li>
+                <div class="collapsible-header">
+                  <i class="material-icons">redeem</i>
+                  Feedback e Bugs
+                  <span class="badge blue-text">0 - Mensagens | 0 - Tópicos</span>
+                </div>
+                <p style="margin-top: 4px; padding: 10px;">
+                  <i class="material-icons right" style="cursor: pointer;">play_circle_outline</i>
+                  Achou erros? quer melhorar a plataforma? seja um colaborador!
+                </p>
+                <div class="collapsible-body blue">
+                  <div class="row">
+                    <a class="col offset-s1 s10 waves-effect btn white blue-text" style="margin-top: 25px;">
+                      <i class="material-icons left">bug_report</i>
+                      <i class="material-icons right grey-text">new_releases</i>
+                      Erros
+                    </a>
+                    <a class="col offset-s1 s10 waves-effect btn white blue-text" style="margin-top: 25px;">
+                      <i class="material-icons left">build</i>
+                      <i class="material-icons right grey-text">new_releases</i>
+                      Correções
+                    </a>
+                    <a class="col offset-s1 s10 waves-effect btn white blue-text" style="margin-top: 25px;">
+                      <i class="material-icons left">cached</i>
+                      <i class="material-icons right grey-text">new_releases</i>
+                      Melhorias
+                    </a>
+                    <a class="col offset-s1 s10 waves-effect btn white blue-text" style="margin-top: 25px;">
+                      <i class="material-icons left">bookmark</i>
+                      <i class="material-icons right grey-text">new_releases</i>
+                      Sugestões
+                    </a>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <!-- Eventos -->
+          <div class="col offset-s1 s10">
+            <ul class="collapsible" data-collapsible="accordion">
+              <li>
+                <div class="collapsible-header">
+                  <i class="material-icons">redeem</i>
+                  Eventos
+                  <span class="badge blue-text">0 - Mensagens | 0 - Tópicos</span>
+                </div>
+                <p style="margin-top: 4px; padding: 10px;">
+                  <i class="material-icons right" style="cursor: pointer;">play_circle_outline</i>
+                  Fique por dentro de eventos e concursos que estão ocorrendo dentro e fora de nosso fórum. E se você conhece algum, divulgue
+                  também.
+                </p>
+                <div class="collapsible-body blue">
+                  <div class="row">
+                    <a class="col offset-s1 s10 waves-effect btn white blue-text" style="margin-top: 25px;">
+                      <i class="material-icons left">verified_user</i>
+                      <i class="material-icons right grey-text">new_releases</i>
+                      Oficiais
+                    </a>
+                    <a class="col offset-s1 s10 waves-effect btn white blue-text" style="margin-top: 25px;">
+                      <i class="material-icons left">thumb_up</i>
+                      <i class="material-icons right grey-text">new_releases</i>
+                      Comunidade
+                    </a>
+                    <a class="col offset-s1 s10 waves-effect btn white blue-text" style="margin-top: 25px;">
+                      <i class="material-icons left">public</i>
+                      <i class="material-icons right grey-text">new_releases</i>
+                      Outros
+                    </a>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <!-- Divulgações -->
+          <div class="col offset-s1 s10">
+            <ul class="collapsible" data-collapsible="accordion">
+              <li>
+                <div class="collapsible-header">
+                  <i class="material-icons">redeem</i>
+                  Divulgações
+                  <span class="badge blue-text">0 - Mensagens | 0 - Tópicos</span>
+                </div>
+                <p style="margin-top: 4px; padding: 10px;">
+                  <i class="material-icons right" style="cursor: pointer;">play_circle_outline</i>
+                  Seu site, blog ou afins precisa de uma boa divulgação, por isso não deixe de passar por aqui para todos conhecerem seu trabalho!
+                </p>
+                <div class="collapsible-body blue">
+                  <div class="row">
+                    <a class="col offset-s1 s10 waves-effect btn white blue-text" style="margin-top: 25px;">
+                      <i class="material-icons left">work</i>
+                      <i class="material-icons right grey-text">new_releases</i>
+                      Trabalhos
+                    </a>
+                    <a class="col offset-s1 s10 waves-effect btn white blue-text" style="margin-top: 25px;">
+                      <i class="material-icons left">stars</i>
+                      <i class="material-icons right grey-text">new_releases</i>
+                      Populares
+                    </a>
+                    <a class="col offset-s1 s10 waves-effect btn white blue-text" style="margin-top: 25px;">
+                      <i class="material-icons left">settings</i>
+                      <i class="material-icons right grey-text">new_releases</i>
+                      Em Desenvolvimento
+                    </a>
+                    <a class="col offset-s1 s10 waves-effect btn white blue-text" style="margin-top: 25px;">
+                      <i class="material-icons left">next_week</i>
+                      <i class="material-icons right grey-text">new_releases</i>
+                      Completos
+                    </a>
+                    <a class="col offset-s1 s10 waves-effect btn white blue-text" style="margin-top: 25px;">
+                      <i class="material-icons left">monetization_on</i>
+                      <i class="material-icons right grey-text">new_releases</i>
+                      Comerciais
+                    </a>
+                    <a class="col offset-s1 s10 waves-effect btn white blue-text" style="margin-top: 25px;">
+                      <i class="material-icons left">free_breakfast</i>
+                      <i class="material-icons right grey-text">new_releases</i>
+                      Gratuitos
+                    </a>
+                    <a class="col offset-s1 s10 waves-effect btn white blue-text" style="margin-top: 25px;">
+                      <i class="material-icons left">g_translate</i>
+                      <i class="material-icons right grey-text">new_releases</i>
+                      Traduzidos
+                    </a>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <!-- Projetos e Jogos -->
+          <div class="col offset-s1 s10 card-panel blue white-text center-align" style="margin-top: 25px;">
+            <h5>
+              Projetos e Jogos
+            </h5>
+          </div>
+          <div class="col offset-s1 s10 card-panel blue white-text center-align" style="margin-top: 25px;">
+            <h5>
+              Desenvolvimento de Jogos
+            </h5>
+          </div>
+          <div class="col offset-s1 s10 card-panel blue white-text center-align" style="margin-top: 25px;">
+            <h5>
+              Centro Acadêmico
+            </h5>
+          </div>
+          <div class="col offset-s1 s10 card-panel blue white-text center-align" style="margin-top: 25px;">
+            <h5>
+              Categoria Geral
+            </h5>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--Import jQuery before materialize.js-->
+  <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="js/materialize.min.js"></script>
+  <!--Import socket.io, JsonEx before lz-string.js-->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js" integrity="sha256-WPeFPWD3PZQUDrpFnDM1N2KadNVwCfNS4cCZ78b76T8="
     crossorigin="anonymous"></script>
-  <script src="js/bootstrap.min.js"></script>
-
-  <!-- PAGE RENDER -->
-  <script src="scripts/indexRender.js"></script>
+  <script type="text/javascript" src="js/lib/JsonEx.js"></script>
+  <script type="text/javascript" src="js/lib/lz-string.js"></script>
+  <!-- Scripts -->
+  <script type="text/javascript" src="scripts/requestLogin.js"></script>
 </body>
 
 </html>

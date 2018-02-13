@@ -1,0 +1,9 @@
+{
+    "user": {
+        "name": "admin",
+        "password": "_master=Admin2017"
+    },
+    "address": "localhost",
+    "port": "30000",
+    "db": "ndzserver"
+}
