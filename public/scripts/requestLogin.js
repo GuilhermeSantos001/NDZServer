@@ -72,9 +72,20 @@ function connectToMainServer() {
         ${money.toString()}`);
         $("#btnConfiguraçõesDePerfil").removeClass("disabled");
         var ls = localStorage;
+        if (!ls.getItem('NDZServer')) {
+            var accountRegisterSave = $("#accountRemember").prop('checked') || $("#accountRemember2").prop('checked');
+        } else {
+            let data = JSON.parse(LZString.decompressFromBase64(ls.getItem('NDZServer')));
+            var accountRegisterSaveButtons = $("#accountRemember").prop('checked') || $("#accountRemember2").prop('checked');
+            var accountRegisterSave = data.accountRegisterSave;
+            if (accountRegisterSaveButtons) {
+                accountRegisterSave = true;
+            }
+        }
         ls.setItem('NDZServer', LZString.compressToBase64(JSON.stringify({
             "accountIP": accountIP,
-            "accountEmail": accountEmail
+            "accountEmail": accountEmail,
+            "accountRegisterSave": accountRegisterSave
         })));
     };
 
@@ -231,11 +242,19 @@ function accountExist() {
         data = JSON.parse(LZString.decompressFromBase64(ls.getItem('NDZServer')))
     }
     if (data) {
-        var accountIP = String(data.accountIP);
-        var accountEmail = String(data.accountEmail);
-        if (accountIP == userIp) {
-            $('#modal_3').modal('open');
-            $('#icon_prefix_5').val(accountEmail);
+        var accountRemember = String(data.accountRegisterSave);
+        if (accountRemember != 'true') {
+            var accountIP = String(data.accountIP);
+            var accountEmail = String(data.accountEmail);
+            if (accountIP == userIp) {
+                $('#modal_3').modal('open');
+                $('#icon_prefix_5').val(accountEmail);
+            }
+        } else {
+            var accountData = LZString.compressToEncodedURIComponent(JSON.stringify({
+                accountIP: userIp
+            }));
+            socket.emit('loginRememberAccount', accountData);
         }
     }
 };

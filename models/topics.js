@@ -1,6 +1,6 @@
 //================================================================================
-// Schema(Users)
-// Feito para o cadastro de usuarios
+// Schema(Topics)
+// Feito para a criação de tópicos
 //================================================================================
 /**
  * @private Restrito ao escopo global
@@ -83,60 +83,47 @@ var dateNow = function () {
  * @description Cria uma instancia da classe Schema
  * @default new Schema({})
  */
-var usersSchema = new Schema({
-    email: {
-        type: String,
-        lowercase: true,
-        trim: true,
-        match: [/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/, "O valor não é valido ({VALUE})"],
-        required: [true, '{PATH} este campo é obrigatório']
-    },
-    password: {
-        type: String,
-        trim: true,
-        required: [true, '{PATH} este campo é obrigatório para sua segurança'],
-        minlength: [8, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).']
-    },
-    username: {
+var topicsSchema = new Schema({
+    title: {
         type: String,
         trim: true,
         required: [true, '{PATH} este campo é obrigatório'],
         maxlength: [20, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento maximo permitido ({MAXLENGTH}).'],
         minlength: [2, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).']
     },
-    money: {
-        type: Number,
-        max: [99999, 'O valor do caminho `{PATH}` ({VALUE}) é maior que o maximo permitido ({MAX}).'],
-        min: [0, 'O valor do caminho `{PATH}` ({VALUE}) é menor que o minimo permitido ({MIN}).'],
-        required: [true, '{PATH} este campo é obrigatório']
+    tags: {
+        type: String,
+        enum: ['Topic', 'Comum']
     },
-    level: {
-        type: Number,
-        max: [90, 'O valor do caminho `{PATH}` ({VALUE}) é maior que o maximo permitido ({MAX}).'],
-        min: [1, 'O valor do caminho `{PATH}` ({VALUE}) é menor que o minimo permitido ({MIN}).'],
-        default: 1,
-        required: [true, '{PATH} este campo é obrigatório']
-    },
-    lastLogin: {
+    authorName: [{ // Username
         type: String,
         trim: true,
-        default: dateNow()
-    },
-    accountIP: {
+        required: [true, '{PATH} este campo é obrigatório'],
+        maxlength: [20, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento maximo permitido ({MAXLENGTH}).'],
+        minlength: [2, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).']
+    }, { // Endereço de Email
+        type: String,
+        lowercase: true,
+        trim: true,
+        match: [/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/, "O valor não é valido ({VALUE})"],
+        required: [true, '{PATH} este campo é obrigatório']
+    }, { // Endereço de IP
         type: String,
         unique: true,
         trim: true,
         require: [true, '{PATH} este campo é obrigatório']
+    }],
+    likes: {
+        type: Number,
+        max: [99999, 'O valor do caminho `{PATH}` ({VALUE}) é maior que o maximo permitido ({MAX}).'],
+        min: [0, 'O valor do caminho `{PATH}` ({VALUE}) é menor que o minimo permitido ({MIN}).'],
+        default: 0
     },
-    accountCode: {
-        type: String,
-        unique: true,
-        trim: true,
-        required: [true, '{PATH} este campo é obrigatório']
-    },
-    accountCodeActivated: {
-        type: Boolean,
-        default: false
+    dislike: {
+        type: Number,
+        max: [99999, 'O valor do caminho `{PATH}` ({VALUE}) é maior que o maximo permitido ({MAX}).'],
+        min: [0, 'O valor do caminho `{PATH}` ({VALUE}) é menor que o minimo permitido ({MIN}).'],
+        default: 0
     },
     dateCreated: {
         type: String,
@@ -148,14 +135,14 @@ var usersSchema = new Schema({
 /**
  * @public Exportado pelo module.exports
  * @type {{}}
- * @description Define o Schema para criar os usuarios
- * @default mongoose.model('users', usersSchema)
+ * @description Define o Schema para criar os topicos
+ * @default mongoose.model('topics', topicsSchema)
  */
-var Users = mongoose.model('users', usersSchema);
+var Topics = mongoose.model('topics', topicsSchema);
 
 //================================================================================
 // MODULO PARA EXPORTAR O SCRIPT
 //================================================================================
 module.exports = {
-    Users: Users
+    Topics: Topics
 };

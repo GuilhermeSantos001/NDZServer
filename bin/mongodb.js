@@ -31,6 +31,14 @@ var Schema_users = require('../models/users').Users;
 /**
  * @private Restrito ao escopo global
  * @type {{}}
+ * @description Importa o modulo para criar o Schema de topicos
+ * @default require('../models/topics').Topics
+ */
+var Schema_topics = require('../models/topics').Topics;
+
+/**
+ * @private Restrito ao escopo global
+ * @type {{}}
  * @description Importa o modulo para exibir mensagens no console
  * @default require('./www').drawMessageServer
  */
@@ -335,6 +343,16 @@ serversIO.serverMainIO.on('connect', (socket) => {
             callbackSocketError = String(contentData.callbackSocketError);
         loginAccount(accountEmail, accountPassword, callbackSocket, callbackSocketError);
     });
+    // Faz uma requisição para logar na conta(registro salvo)
+    socket.on('loginRememberAccount', (content) => {
+        if (!content && typeof content != 'string' ||
+            typeof content === 'string' && content.length <= 0) {
+            return drawMessageServer('Chamada para requestLogin resultou um erro, pois o parametro content não é uma string', 'errorImportant');
+        }
+        var contentData = JSON.parse(LZString.decompressFromEncodedURIComponent(content)) || {};
+        var accountIP = String(contentData.accountIP);
+        loginRegisterSaveAccount(accountIP);
+    });
 });
 
 //================================================================================
@@ -550,6 +568,53 @@ function loginAccount(email, password, callbackSocket, callbackSocketError) {
                 });
             } else {
                 drawMessageServer(`A conta no email(${email}) não existe!`, 'successError');
+                return mongoose.connection.close();
+            }
+        });
+    });
+};
+
+/**
+ * @public Exportado pelo module.exports
+ * @description Faz uma requisição de login para a conta(registro salvo)
+ * @param {string} callbackSocketError Chamada de retorno de erro para o socket
+ * @author GuilhermeSantos
+ * @version 1.0.0
+ */
+function loginRegisterSaveAccount(accountIP) {
+    mongoose.connect(uri, options, (error, db) => {
+        if (error) {
+            return drawMessageServer('A tentativa de se conectar ao mongoDB falhou! ' + error, 'errorImportant');
+        }
+        if (!accountIP) {
+            drawMessageServer(`Não é possivel fazer uma verificação para a conta com essas configurações: ${accountIP}`, 'error');
+            return mongoose.connection.close();
+        };
+        // Faz uma verificação para ver se a conta já existe 
+        Schema_users.count({
+            accountIP: accountIP
+        }, function (err, count) {
+            if (err) {
+                return drawMessageServer('Não foi possivel verificar se existe a conta no banco de dados, erro: ' + err, 'error');
+            }
+            if (count > 0) {
+                Schema_users.findOne({
+                    accountIP: accountIP
+                }, function (err, user) {
+                    if (err) {
+                        return drawMessageServer(`Não foi possivel recuperar a conta(ip:${accountIP}, erro: ` + error, 'errorImportant');
+                    }
+                    serversIO.serverMainIO.emit('connect_account', LZString.compressToEncodedURIComponent(JSON.stringify({
+                        email: user.email,
+                        username: user.username,
+                        money: user.money,
+                        accountIP: user.accountIP
+                    })));
+                    drawMessageServer(`O login para a conta no ip(${accountIP}) foi requisitado!`, 'success');
+                    mongoose.connection.close();
+                });
+            } else {
+                drawMessageServer(`A conta no ip(${accountIP}) não existe!`, 'successError');
                 return mongoose.connection.close();
             }
         });
