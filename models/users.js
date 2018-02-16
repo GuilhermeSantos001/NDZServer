@@ -74,7 +74,49 @@ var dateNow = function () {
     var data = mes[date.getMonth()] || '???';
     var dataDia = date.getDate();
     var dia = dias[date.getDay()];
-    return `Conta criada em ${dataDia} de ${data} de ${ano}, no ${dia} as ${h}Horas, ${m}Minutos e ${s}Segundos`;
+    return `Conta criada em ${dataDia} de ${data} de ${ano}, na ${dia} as ${h}Horas, ${m}Minutos e ${s}Segundos`;
+};
+
+/**
+ * @private Restrito ao escopo global
+ * @description Retorna um texto, uma data completa, dia da semana, dia do 
+ * mes, mes, ano e hora para o login
+ * @author GuilhermeSantos
+ * @version 1.0.0
+ */
+function dateNowToLogin() {
+    var dias = [
+        "Domingo",
+        "Segunda",
+        "Terça",
+        "Quarta",
+        "Quinta",
+        "Sexta",
+        "Sabado"
+    ];
+    var mes = [
+        "Janeiro",
+        "Fevereiro",
+        "Março",
+        "Abril",
+        "Maio",
+        "Junho",
+        "Julho",
+        "Agosto",
+        "Setembro",
+        "Outubro",
+        "Novembro",
+        "Dezembro"
+    ];
+    var date = new Date();
+    var h = padZero(date.getHours(), 2);
+    var m = padZero(date.getMinutes(), 2);
+    var s = padZero(date.getSeconds(), 2);
+    var ano = date.getFullYear();
+    var data = mes[date.getMonth()] || '???';
+    var dataDia = date.getDate();
+    var dia = dias[date.getDay()];
+    return `Último login foi em ${dataDia} de ${data} de ${ano}, na ${dia} as ${h}Horas, ${m}Minutos e ${s}Segundos`;
 };
 
 /**
@@ -114,29 +156,16 @@ var usersSchema = new Schema({
         type: Number,
         max: [90, 'O valor do caminho `{PATH}` ({VALUE}) é maior que o maximo permitido ({MAX}).'],
         min: [1, 'O valor do caminho `{PATH}` ({VALUE}) é menor que o minimo permitido ({MIN}).'],
-        default: 1,
         required: [true, '{PATH} este campo é obrigatório']
+    },
+    achievements: {
+        type: String,
+        enum: []
     },
     lastLogin: {
         type: String,
         trim: true,
-        default: dateNow()
-    },
-    accountIP: {
-        type: String,
-        unique: true,
-        trim: true,
-        require: [true, '{PATH} este campo é obrigatório']
-    },
-    accountCode: {
-        type: String,
-        unique: true,
-        trim: true,
-        required: [true, '{PATH} este campo é obrigatório']
-    },
-    accountCodeActivated: {
-        type: Boolean,
-        default: false
+        default: dateNowToLogin()
     },
     dateCreated: {
         type: String,
@@ -156,6 +185,4 @@ var Users = mongoose.model('users', usersSchema);
 //================================================================================
 // MODULO PARA EXPORTAR O SCRIPT
 //================================================================================
-module.exports = {
-    Users: Users
-};
+module.exports = Users;

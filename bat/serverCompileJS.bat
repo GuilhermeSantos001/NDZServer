@@ -9,4 +9,4 @@ echo //=========================================================================
 cd D:\NDZServer
 pause
 
-npm start
+call npm run prod

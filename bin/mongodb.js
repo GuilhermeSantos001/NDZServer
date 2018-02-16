@@ -26,15 +26,7 @@ var configMongoDB = require('../configs/mongodb') || {
  * @description Importa o modulo para criar o Schema de usuarios
  * @default require('../models/users').Users
  */
-var Schema_users = require('../models/users').Users;
-
-/**
- * @private Restrito ao escopo global
- * @type {{}}
- * @description Importa o modulo para criar o Schema de topicos
- * @default require('../models/topics').Topics
- */
-var Schema_topics = require('../models/topics').Topics;
+var Schema_users = require('../models/users');
 
 /**
  * @private Restrito ao escopo global
@@ -288,540 +280,78 @@ process.on('SIGINT', function () {
     });
 });
 
-//=============================================================================
-// EVENTO DE CONEXÂO DO SERVIDOR PRINCIPAL
-//=============================================================================
-/**
- * @description Se o socket estabelecer uma conexão
- */
-serversIO.serverMainIO.on('connect', (socket) => {
-    // Faz uma requisição para a criação de conta
-    socket.on('createAccount', (content) => {
-        if (!content && typeof content != 'string' ||
-            typeof content === 'string' && content.length <= 0) {
-            return drawMessageServer('Chamada para requestLogin resultou um erro, pois o parametro content não é uma string', 'errorImportant');
-        }
-        var contentData = JSON.parse(LZString.decompressFromEncodedURIComponent(content)) || {};
-        var email = String(contentData.email),
-            password = String(contentData.password),
-            username = String(contentData.username),
-            money = Number(contentData.money),
-            accountCode = String(contentData.accountCode),
-            accountIP = String(contentData.accountIP);
-        createAccount(email, password, username, money, accountCode, accountIP);
-    });
-    // Faz uma requisição para a verificação da conta
-    socket.on('existAccount', (content) => {
-        if (!content && typeof content != 'string' ||
-            typeof content === 'string' && content.length <= 0) {
-            return drawMessageServer('Chamada para requestLogin resultou um erro, pois o parametro content não é uma string', 'errorImportant');
-        }
-        var contentData = JSON.parse(LZString.decompressFromEncodedURIComponent(content)) || {};
-        var accountIP = String(contentData.accountIP);
-        existAccount(accountIP);
-    });
-    // Faz uma requisição para recuperar o email da conta
-    socket.on('emailAccount', (content) => {
-        if (!content && typeof content != 'string' ||
-            typeof content === 'string' && content.length <= 0) {
-            return drawMessageServer('Chamada para requestLogin resultou um erro, pois o parametro content não é uma string', 'errorImportant');
-        }
-        var contentData = JSON.parse(LZString.decompressFromEncodedURIComponent(content)) || {};
-        var accountIP = String(contentData.accountIP);
-        emailAccount(accountIP);
-    });
-    // Faz uma requisição para logar na conta
-    socket.on('loginAccount', (content) => {
-        if (!content && typeof content != 'string' ||
-            typeof content === 'string' && content.length <= 0) {
-            return drawMessageServer('Chamada para requestLogin resultou um erro, pois o parametro content não é uma string', 'errorImportant');
-        }
-        var contentData = JSON.parse(LZString.decompressFromEncodedURIComponent(content)) || {};
-        var accountEmail = String(contentData.email),
-            accountPassword = String(contentData.password),
-            callbackSocket = String(contentData.callbackSocket),
-            callbackSocketError = String(contentData.callbackSocketError);
-        loginAccount(accountEmail, accountPassword, callbackSocket, callbackSocketError);
-    });
-    // Faz uma requisição para logar na conta(registro salvo)
-    socket.on('loginRememberAccount', (content) => {
-        if (!content && typeof content != 'string' ||
-            typeof content === 'string' && content.length <= 0) {
-            return drawMessageServer('Chamada para requestLogin resultou um erro, pois o parametro content não é uma string', 'errorImportant');
-        }
-        var contentData = JSON.parse(LZString.decompressFromEncodedURIComponent(content)) || {};
-        var accountIP = String(contentData.accountIP);
-        loginRegisterSaveAccount(accountIP);
-    });
-});
-
 //================================================================================
 // MODULOS DO BANCO DE DADOS
 //================================================================================
 /**
- * @public Exportado pelo module.exports
- * @description Cria uma conta de usuario
- * @param {string} email Endereço de email
- * @param {string} password Senha de usuario
- * @param {string} username Nome de usuario
- * @param {string} money Dinheiro do usuario
- * @param {string} accountCode Codigo de ativação da conta
- * @param {string} accountIP IP do usuario
- * @author GuilhermeSantos
- * @version 1.0.0
- */
-function createAccount(email, password, username, money, accountCode, accountIP) {
-    mongoose.connect(uri, options, (error, db) => {
-        if (error) {
-            return drawMessageServer('A tentativa de se conectar ao mongoDB falhou! ' + error, 'errorImportant');
-        }
-        if (typeof money == 'number') {
-            var moneyCheck = true;
-        } else {
-            var moneyCheck = false;
-        }
-        if (!email || !password || !username || !moneyCheck || !accountCode || !accountIP) {
-            drawMessageServer(`Não é possivel criar uma conta com essas configurações: ${email} ${password} ${username} ${money} ${accountCode} ${accountIP}`, 'error');
-            return mongoose.connection.close();
-        };
-
-        // Cria o novo usuario
-        var user = new Schema_users({
-            email: email,
-            password: LZString.compressToBase64(JSON.stringify(encryptJSON(password))),
-            username: username,
-            money: money,
-            accountCode: accountCode,
-            accountIP: accountIP
-        });
-
-        // Faz uma verificação para ver se a conta já existe 
-        Schema_users.count({
-            accountIP: accountIP
-        }, function (err, count) {
-            if (err) {
-                return drawMessageServer('Não foi possivel verificar se existe a conta no banco de dados, erro: ' + err, 'error');
-            }
-            if (count > 0) {
-                drawMessageServer(`A conta no ip(${accountIP}) já existe!`, 'important');
-                serversIO.serverMainIO.emit('account_existRequestLogin');
-                return mongoose.connection.close();
-            }
-            saveAccount();
-        });
-
-        // Conclusão para adicionar a conta
-        function saveAccount() {
-            // Faz uma validação de dados antes de criar a conta
-            user.validate(function (err) {
-                if (err) {
-                    drawMessageServer(err.message || err, 'alert');
-                    mongoose.connection.close();
-                } else {
-                    // Salva o usuario no banco de dados
-                    user.save(function (err) {
-                        if (err) {
-                            return drawMessageServer('Não foi possivel salvar o usuario no banco de dados, erro: ' + err, 'important');
-                        }
-                        drawMessageServer(`Usuario ${email} salvo no banco de dados`, 'success');
-                        serversIO.serverMainIO.emit('connect_account', LZString.compressToEncodedURIComponent(JSON.stringify({
-                            email: email,
-                            username: username,
-                            money: money,
-                            accountIP: accountIP
-                        })));
-                        mongoose.connection.close();
-                    });
-                }
-            });
-        }
-    });
-};
-
-/**
- * @public Exportado pelo module.exports
- * @description Verifica se a conta existe no IP
- * @param {string} accountIP Endereço de ip
- * @author GuilhermeSantos
- * @version 1.0.0
- */
-function existAccount(accountIP) {
-    mongoose.connect(uri, options, (error, db) => {
-        if (error) {
-            return drawMessageServer('A tentativa de se conectar ao mongoDB falhou! ' + error, 'errorImportant');
-        }
-        if (!accountIP) {
-            drawMessageServer(`Não é possivel fazer uma verificação para a conta com essas configurações: ${accountIP}`, 'error');
-            return mongoose.connection.close();
-        };
-        // Faz uma verificação para ver se a conta já existe 
-        Schema_users.count({
-            accountIP: accountIP
-        }, function (err, count) {
-            if (err) {
-                return drawMessageServer('Não foi possivel verificar se existe a conta no banco de dados, erro: ' + err, 'error');
-            }
-            if (count > 0) {
-                serversIO.serverMainIO.emit('account_exist');
-                drawMessageServer(`A conta no ip(${accountIP}) existe!`, 'success');
-            } else {
-                serversIO.serverMainIO.emit('account_noExist');
-                drawMessageServer(`A conta no ip(${accountIP}) não existe!`, 'successError');
-            }
-            return mongoose.connection.close();
-        });
-    });
-};
-
-/**
- * @public Exportado pelo module.exports
- * @description Recupera o email da conta
- * @param {string} accountIP Endereço de ip
- * @author GuilhermeSantos
- * @version 1.0.0
- */
-function emailAccount(accountIP) {
-    mongoose.connect(uri, options, (error, db) => {
-        if (error) {
-            return drawMessageServer('A tentativa de se conectar ao mongoDB falhou! ' + error, 'errorImportant');
-        }
-        if (!accountIP) {
-            drawMessageServer(`Não é possivel fazer uma verificação para a conta com essas configurações: ${accountIP}`, 'error');
-            return mongoose.connection.close();
-        };
-        // Faz uma verificação para ver se a conta já existe 
-        Schema_users.count({
-            accountIP: accountIP
-        }, function (err, count) {
-            if (err) {
-                return drawMessageServer('Não foi possivel verificar se existe a conta no banco de dados, erro: ' + err, 'error');
-            }
-            if (count > 0) {
-                Schema_users.findOne({
-                    accountIP: accountIP
-                }, function (err, user) {
-                    if (err) {
-                        return drawMessageServer(`Não foi possivel recuperar o email da conta(ip:${accountIP}, erro: ` + error, 'errorImportant');
-                    }
-                    var email = user.email;
-                    serversIO.serverMainIO.emit('account_email', LZString.compressToEncodedURIComponent(JSON.stringify({
-                        email: email
-                    })));
-                    drawMessageServer(`O email da conta no ip(${accountIP}) é ${email}`, 'success');
-                    mongoose.connection.close();
-                });
-            } else {
-                drawMessageServer(`A conta no ip(${accountIP}) não existe!`, 'successError');
-                return mongoose.connection.close();
-            }
-        });
-    });
-};
-
-/**
- * @public Exportado pelo module.exports
- * @description Faz uma requisição de login para a conta
+ * @description Cria um novo usuario
  * @param {string} email Endereço de email da conta
  * @param {string} password Senha da conta
- * @param {string} callbackSocket Chamada de retorno para o socket
- * @param {string} callbackSocketError Chamada de retorno de erro para o socket
+ * @param {string} username Nome de usuario da conta
+ * @param {number} money Dinheiro de usuario da conta
+ * @param {number} level Nivel de usuario da conta
  * @author GuilhermeSantos
  * @version 1.0.0
  */
-function loginAccount(email, password, callbackSocket, callbackSocketError) {
-    mongoose.connect(uri, options, (error, db) => {
-        if (error) {
-            return drawMessageServer('A tentativa de se conectar ao mongoDB falhou! ' + error, 'errorImportant');
-        }
-        if (!email || !password || !callbackSocket || !callbackSocketError) {
-            drawMessageServer(`Não é possivel fazer uma verificação para a conta com essas configurações: ${email} ${password} ${callbackSocket} ${callbackSocketError}`, 'error');
+function createAccount(email, password, username, money, level) {
+    mongoose.connect(uri, options, (err) => {
+        if (err) {
+            drawMessageServer('Não foi possivel conectar com o mongoDB', 'important');
+            drawMessageServer(`Erro: ${err}`, 'errorImportant');
             return mongoose.connection.close();
-        };
-        // Faz uma verificação para ver se a conta já existe 
-        Schema_users.count({
-            email: email
-        }, function (err, count) {
+        }
+        mongooseConnected();
+    });
+
+    function mongooseConnected() {
+        var user = new Schema_users({
+            email: String(email),
+            password: LZString.compressToBase64(JsonEx.stringify(encryptJSON(String(password)))),
+            username: String(username),
+            money: Math.floor(Number(money)),
+            level: Math.floor(Number(level))
+        });
+        user.validate((err) => {
             if (err) {
-                return drawMessageServer('Não foi possivel verificar se existe a conta no banco de dados, erro: ' + err, 'error');
-            }
-            if (count > 0) {
-                Schema_users.findOne({
-                    email: email
-                }, function (err, user) {
-                    if (err) {
-                        return drawMessageServer(`Não foi possivel recuperar o email da conta(ip:${accountIP}, erro: ` + error, 'errorImportant');
-                    }
-                    var userPassword = decryptJSON(JSON.parse(LZString.decompressFromBase64(user.password)));
-                    if (password == userPassword) {
-                        if (callbackSocket) serversIO.serverMainIO.emit(callbackSocket, LZString.compressToEncodedURIComponent(JSON.stringify({
-                            email: user.email,
-                            username: user.username,
-                            money: user.money,
-                            accountIP: user.accountIP
-                        })));
-                        drawMessageServer(`O login para a conta no email(${email}) foi requisitado!`, 'success');
-                    } else {
-                        if (callbackSocketError) serversIO.serverMainIO.emit(callbackSocketError);
-                        drawMessageServer(`A senha para a conta no email(${email}) está errada!`, 'successError');
-                    }
-                    mongoose.connection.close();
-                });
-            } else {
-                drawMessageServer(`A conta no email(${email}) não existe!`, 'successError');
+                drawMessageServer(`Não é possivel criar o novo usuario com o email(${email})`, 'important');
+                drawMessageServer(`Erro: ${err}`, 'errorImportant');
                 return mongoose.connection.close();
             }
-        });
-    });
-};
-
-/**
- * @public Exportado pelo module.exports
- * @description Faz uma requisição de login para a conta(registro salvo)
- * @param {string} callbackSocketError Chamada de retorno de erro para o socket
- * @author GuilhermeSantos
- * @version 1.0.0
- */
-function loginRegisterSaveAccount(accountIP) {
-    mongoose.connect(uri, options, (error, db) => {
-        if (error) {
-            return drawMessageServer('A tentativa de se conectar ao mongoDB falhou! ' + error, 'errorImportant');
-        }
-        if (!accountIP) {
-            drawMessageServer(`Não é possivel fazer uma verificação para a conta com essas configurações: ${accountIP}`, 'error');
-            return mongoose.connection.close();
-        };
-        // Faz uma verificação para ver se a conta já existe 
-        Schema_users.count({
-            accountIP: accountIP
-        }, function (err, count) {
-            if (err) {
-                return drawMessageServer('Não foi possivel verificar se existe a conta no banco de dados, erro: ' + err, 'error');
-            }
-            if (count > 0) {
-                Schema_users.findOne({
-                    accountIP: accountIP
-                }, function (err, user) {
-                    if (err) {
-                        return drawMessageServer(`Não foi possivel recuperar a conta(ip:${accountIP}, erro: ` + error, 'errorImportant');
-                    }
-                    serversIO.serverMainIO.emit('connect_account', LZString.compressToEncodedURIComponent(JSON.stringify({
-                        email: user.email,
-                        username: user.username,
-                        money: user.money,
-                        accountIP: user.accountIP
-                    })));
-                    drawMessageServer(`O login para a conta no ip(${accountIP}) foi requisitado!`, 'success');
-                    mongoose.connection.close();
-                });
-            } else {
-                drawMessageServer(`A conta no ip(${accountIP}) não existe!`, 'successError');
-                return mongoose.connection.close();
-            }
-        });
-    });
-};
-
-/**
- * @public Exportado pelo module.exports
- * @description Remove a conta de usuario
- * @param {string} email Email do usuario a ser removido
- * @author GuilhermeSantos
- * @version 1.0.0
- */
-function removeAccount(email) {
-    mongoose.connect(uri, options, (error, db) => {
-        if (error) {
-            return drawMessageServer('A tentativa de se conectar ao mongoDB falhou! ' + error, 'errorImportant');
-        }
-
-        if (!email || typeof email != 'string') {
-            drawMessageServer(`Não é possivel remover uma conta com essas configurações: ${email}`, 'error');
-            return mongoose.connection.close();
-        }
-
-        // Cria uma busca pelo documento com a  propriedade 'email' e quando encontra o primeiro ele 
-        // remove o documento
-        Schema_users.findOneAndRemove({
-            email: email
-        }, function (err, user) {
-            if (err) {
-                return drawMessageServer('Não foi possivel remover o usuario no banco de dados, erro: ' + err, 'important');
-            }
-
-            // Se o usuario existir
-            if (user) {
-                drawMessageServer(`Usuario ${email} removido do banco de dados`, 'success');
-            }
-            mongoose.connection.close();
-        });
-    });
-};
-
-/**
- * @public Exportado pelo module.exports
- * @description Atualiza a conta do usuario
- * @param {string} email Email do usuario
- * @param {{}} set Propriedades a serem atualizadas ou adicionadas
- * @param {{}} unset Propriedades a serem removidas
- * @author GuilhermeSantos
- * @version 1.0.0
- */
-function updateAccount(email, set, unset) {
-    mongoose.connect(uri, options, (error, db) => {
-        if (error) {
-            return drawMessageServer('A tentativa de se conectar ao mongoDB falhou! ' + error, 'errorImportant');
-        }
-
-        if (!email || typeof email != 'string' || set && typeof set != 'object' || unset && typeof unset != 'object') {
-            drawMessageServer(`Não é possivel remover uma conta com essas configurações: ${email} ${set} ${unset}`, 'error');
-            return mongoose.connection.close();
-        }
-
-        // Atualiza os dados
-        function updateProps(callback) {
-            if (!set) {
-                if (unset) {
-                    return callback();
-                }
-                return mongoose.connection.close();
-            }
-
-            Schema_users.findOneAndUpdate({
+            Schema_users.findOne({
                 email: email
-            }, {
-                $set: Object.assign({}, set)
-            }, function (err, user) {
-                if (error) {
-                    return drawMessageServer('Não foi possivel atualizar o usuario no banco de dados, erro: ' + error, 'important');
+            }, (err, account) => {
+                if (err) {
+                    drawMessageServer(`Não foi possivel verificar se o usuario com o email(${email}) já foi salvo`, 'important');
+                    drawMessageServer(`Erro: ${err}`, 'errorImportant');
+                    return mongoose.connection.close();
                 }
-
-                // Se o usuario existir
-                if (user) {
-                    drawMessageServer(`Dados(${Object.keys(set).length}) do usuario ${email} foram atualizado no banco de dados`, 'success');
+                if (!account) {
+                    user.save(function (err) {
+                        if (err) {
+                            drawMessageServer(`Erro na hora de salvar o novo usuario com o email(${email})`, 'important');
+                            drawMessageServer(`Erro: ${err}`, 'errorImportant');
+                            return mongoose.connection.close();
+                        }
+                        drawMessageServer(`Usuario com o email(${email}) salvo no banco de dados`, 'success');
+                        return mongoose.connection.close();
+                    });
+                } else {
+                    drawMessageServer(`O usuario com o email(${email}) já foi salvo`, 'important');
+                    return mongoose.connection.close();
                 }
-
-                if (unset) {
-                    return callback();
-                }
-                mongoose.connection.close();
             });
-        };
-
-        // Remove os dados
-        function removeProps() {
-            if (!unset) {
-                return mongoose.connection.close();
-            }
-
-            Schema_users.findOneAndUpdate({
-                email: email
-            }, {
-                $unset: Object.assign({}, unset)
-            }, function (err, user) {
-                if (error) {
-                    return drawMessageServer('Não foi possivel atualizar o usuario no banco de dados, erro: ' + error, 'important');
-                }
-
-                // Se o usuario existir
-                if (user) {
-                    drawMessageServer(`Dados(${Object.keys(unset).length}) do usuario ${email} foram removidos do banco de dados`, 'success');
-                }
-                mongoose.connection.close();
-            });
-        };
-
-        // Chama a função passando uma callback
-        updateProps(removeProps);
-    });
-};
-
-//================================================================================
-// MODULOS DA PAGINA DO JOGADOR
-//================================================================================
-/**
- * @public Exportado pelo module.exports
- * @description Conecta
- * @param {string} email Email do usuario
- * @author GuilhermeSantos
- * @version 1.0.0
- */
-function playerPage_loginAccount(email, password) {
-    mongoose.connect(uri, options, (error, db) => {
-        if (error) {
-            return drawMessageServer('A tentativa de se conectar ao mongoDB falhou! ' + error, 'errorImportant');
-        }
-
-        if (!email || typeof email != 'string') {
-            drawMessageServer(`Não é possivel logar na conta com essas configurações: ${email} ${password}`, 'error');
-            return mongoose.connection.close();
-        }
-
-        Schema_users.findOne({
-            email: email
-        }, function (err, user) {
-            if (error) {
-                return drawMessageServer('Não foi possivel encontrar o usuario no banco de dados, erro: ' + error, 'important');
-            }
-
-            // Se o usuario existir
-            if (user) {
-                var userPassword = decryptJSON(JSON.parse(LZString.decompressFromBase64(user.password)));
-                if (password === userPassword) {
-                    var content = {};
-                    content.email = user.email;
-                    content.password = userPassword;
-                    content.username = user.username;
-                    content.familyName = user.familyName;
-                    content.lifestyle = user.lifestyle;
-                    content.money = user.money;
-                    content.fameFamily = user.fameFamily;
-                    content.spawnCity = user.spawnCity;
-                    content.level = user.level;
-                    content.lastLogin = user.lastLogin;
-                    serversIO.serverMainIO.emit('playerPage_LoginSuccess', LZString.compressToEncodedURIComponent(JSON.stringify(content)));
-                }
-            }
-            mongoose.connection.close();
         });
-    });
+    }
 };
 
-// createAccount('luizgp120@hotmail.com', '123', 'GuilhermeSantos', 'Mordog', 'Noobie', '678-124-368-972');
-// removeAccount('luizgp120@hotmail.com');
-// updateAccount('luizgp120@hotmail.com', {}, { newProperty: '' });
-// loginAccount('luizgp120@hotmail.com', '123');
+//createAccount('exemple@hotmail.com', '12345678910', 'Gui', 123, 23);
 
-// mongoose.connect(uri, options, (error, db) => {
-//     if (error) {
-//         return drawMessageServer('A tentativa de se conectar ao mongoDB falhou! ' + error, 'errorImportant');
-//     }
-
-//     // Schema_users.create({ name: 'Cintia', idade: 18 }, function (err, small) {
-//     //     if (err) throw err;
-//     // });
-
-//     // users.remove({ name: 'Guilherme' }, (err) => {
-//     //     if (err) throw err;
-//     // });
-
-//     // Schema_users.remove({ name: 'Cintia' }, (err) => {
-//     //     if (err) return console.error(err);
-//     // });
-
-//     // Schema_users.find(function (err, kittens) {
-//     //     if (err) return console.error(err);
-//     //     drawMessageServer(kittens, 'alert');
-//     // });
-// });
+// var compressPassword = LZString.compressToBase64(JsonEx.stringify(encryptJSON('123')));
+// var decompressPassword = decryptJSON(JsonEx.parse(LZString.decompressFromBase64(compressPassword)));
 
 //================================================================================
 // MODULO PARA EXPORTAR O SCRIPT
 //================================================================================
 module.exports = {
-    createAccount: createAccount,
-    removeAccount: removeAccount,
-    updateAccount: updateAccount,
-    playerPage: {
-        playerPage_loginAccount: playerPage_loginAccount
-    }
+    createAccount: createAccount
 };

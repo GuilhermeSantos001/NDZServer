@@ -1,0 +1,9 @@
+{
+    "path": "/main",
+    "port": "9876",
+    "name": "NDZServer",
+    "version": "1.0.2",
+    "license": "MIT",
+    "author": "GuilhermeSantos",
+    "repository": "https://github.com/GuilhermeSantos001/NDZServer"
+}

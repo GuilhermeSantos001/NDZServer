@@ -1,16 +1,29 @@
 /**
  * Principais modulos.
  */
-
 var app = require('../app.js');
 var debug = require('debug')('myapp:server');
 var http = require('http');
+
+/** 
+ * Configurações do servidor
+*/
+var config = require('../configs/server');
+const serverConfig = {
+  port: Number(config["port"]) || 9876,
+  path: String(config["path"]) || "/main",
+  name: String(config["name"]) || "NDZServer",
+  version: String(config["version"]) || "1.0.0",
+  license: String(config["MIT"]) || "MIT",
+  author: String(config["author"]) || "GuilhermeSantos",
+  repository: String(config["repository"]) || "https://github.com/GuilhermeSantos001/NDZServer"
+};
 
 /**
  * Porta do servidor
  */
 
-var port = normalizePort(process.env.PORT || '9876');
+var port = normalizePort(process.env.PORT || serverConfig.port);
 app.set('port', port);
 
 /**
@@ -22,7 +35,7 @@ const server = require('http').createServer(app);
  * Servidor principal
  */
 const serverMainIO = require('socket.io')(server, {
-  path: '/main',
+  path: serverConfig.path,
   serveClient: false,
   pingInterval: 10000,
   pingTimeout: 5000,
@@ -32,7 +45,6 @@ const serverMainIO = require('socket.io')(server, {
 /**
  * Ouça na porta fornecida, em todas as interfaces de rede.
  */
-
 server.listen(port, onReady);
 server.on('error', onError);
 server.on('listening', onListening);
@@ -40,7 +52,6 @@ server.on('listening', onListening);
 /**
  * Normalize uma porta em um número, string ou falso.
  */
-
 function normalizePort(val) {
   var port = parseInt(val, 10);
 
@@ -58,7 +69,6 @@ function normalizePort(val) {
 /**
  * Evento "error" do servidor HTTP.
  */
-
 function onError(error) {
   if (error.syscall !== 'listen') {
     throw error;
@@ -85,7 +95,6 @@ function onError(error) {
 /**
  * Evento "listening" do servidor HTTP.
  */
-
 function onListening() {
   var addr = server.address();
   var bind = typeof addr === 'string' ?
@@ -113,22 +122,22 @@ function loadServerModules() {
  * @description Exibe a mensagem de boas vindas ao desenvolvedor
  * @param {boolean} CClear Define se deve limpar o console antes de mostrar a mensagem
  * @author GuilhermeSantos
- * @version 1.0.0
+ * @version 1.0.1
  */
 function welcomeMessageServer(CClear) {
   if (CClear) console.clear();
   console.log("/////////////////////////////////////////////////////////////////////////////////");
   console.log("//                                                                             //");
-  console.log("//  SERVER: NDZServer v1.0.0                                                   //");
-  console.log("//  LICENSE: ISC                                                               //");
+  console.log(`//  SERVER: NDZServer v1.0.2                                                   //`);
+  console.log("//  LICENSE: MIT                                                               //");
   console.log("//  DEVELOPER: GuilhermeSantos                                                 //");
-  console.log("//  REPOSITORY: GIT https://lzogamesoficial.visualstudio.com/NoDaysofZombies   //");
+  console.log("//  REPOSITORY: GIT https://github.com/GuilhermeSantos001/NDZServer            //");
   console.log("//                                                                             //");
   console.log("//                              GuilhermeSantos                                //");
-  console.log("//             (c) 2017 LZOGames. Todos os direitos reservados.                //");
+  console.log("//             (c) 2018 GuilhermeSantos. Todos os direitos reservados.         //");
   console.log("/////////////////////////////////////////////////////////////////////////////////");
   console.log("");
-  drawMessageServer('Servidor executando em http://localhost:9876/', "fixed");
+  drawMessageServer('Servidor executando em http://localhost:'+serverConfig.port+'/', "alert");
 };
 
 /**
@@ -137,10 +146,12 @@ function welcomeMessageServer(CClear) {
  * @param {string} message Mensagem a ser exibida no console
  * @param {string} icon Icone da mensagem, define a importancia
  * @icons log, error, fixed, comum, alert, important, errorImportant, success and successError
+ * @param {string} author Nome do criador da mensagem
  * @author GuilhermeSantos
- * @version 1.0.0
+ * @version 1.0.1
+ * @return {console} Retorna uma mensagem no console
  */
-function drawMessageServer(message, icon) {
+function drawMessageServer(message, icon, author) {
   padZero = function (string, length) {
     var s = string.toString();
     while (s.length < length) {
@@ -163,7 +174,7 @@ function drawMessageServer(message, icon) {
     success: "✅",
     successError: "❎"
   }
-  console.log(`${icons[icon] || icons["comum"]}  Servidor(${padZero(h, 2)}:${padZero(m, 2)}:${padZero(s, 2)}): ${message}`);
+  console.log(`${icons[icon] || icons["comum"]}  ${author || 'Servidor'}(${padZero(h, 2)}:${padZero(m, 2)}:${padZero(s, 2)}): ${message}`);
   console.log("");
 };
 

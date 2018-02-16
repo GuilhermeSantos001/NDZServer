@@ -3,12 +3,13 @@ const path = require('path');
 module.exports = {
     context: __dirname,
     entry: {
-        translation: './src/translation.js'
+        requestLogin: './src/requestLogin.js',
+        requestTopic: './src/requestTopic.js'
     },
     output: {
-        path: path.join(__dirname, "build"),
+        path: path.join(__dirname, "public/scripts"),
         filename: '[name].js',
-        publicPath: '/build/'
+        publicPath: '/public/scripts/'
     },
     resolve: {
         modules: [path.resolve(__dirname, '/src/'), 'node_modules/'],
