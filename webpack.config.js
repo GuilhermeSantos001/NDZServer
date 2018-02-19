@@ -3,8 +3,8 @@ const path = require('path');
 module.exports = {
     context: __dirname,
     entry: {
-        requestLogin: './src/requestLogin.js',
-        requestTopic: './src/requestTopic.js'
+        requestLS: './src/requestLS.js',
+        requestLogin: './src/requestLogin.js'
     },
     output: {
         path: path.join(__dirname, "public/scripts"),
@@ -20,18 +20,19 @@ module.exports = {
         port: 3000,
         inline: true
     },
+    node: {
+        http: true
+    },
     module: {
-        loaders: [
-            {
-                test: /(\.js|\*)$/,
-                loader: 'babel-loader',
-                exclude: '/node_modules/',
-                query: {
-                    presets: [
-                        ["env"]
-                    ]
-                }
+        loaders: [{
+            test: /(\.js|\*)$/,
+            loader: 'babel-loader',
+            exclude: '/node_modules/',
+            query: {
+                presets: [
+                    ["env"]
+                ]
             }
-        ]
+        }]
     }
 }

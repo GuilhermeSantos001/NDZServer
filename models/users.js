@@ -126,6 +126,12 @@ function dateNowToLogin() {
  * @default new Schema({})
  */
 var usersSchema = new Schema({
+    language: {
+        type: String,
+        lowercase: true,
+        trim: true,
+        required: [true, '{PATH} este campo é obrigatório']
+    },
     email: {
         type: String,
         lowercase: true,

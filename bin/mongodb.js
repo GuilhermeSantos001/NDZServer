@@ -47,6 +47,14 @@ var serversIO = require('./www.js').serversIO;
 /**
  * @private Restrito ao escopo global
  * @type {{}}
+ * @description Importa o modulo do servidor SMTP
+ * @default require('./SMTPServer')
+ */
+const SMTPServer = require('./SMTPServer');
+
+/**
+ * @private Restrito ao escopo global
+ * @type {{}}
  * @description Importa o modulo para comprimir strings
  * @default require('./lib/lz-string')
  */
@@ -285,15 +293,16 @@ process.on('SIGINT', function () {
 //================================================================================
 /**
  * @description Cria um novo usuario
+ * @param {string} language Language Idioma do usuario
  * @param {string} email Endereço de email da conta
  * @param {string} password Senha da conta
  * @param {string} username Nome de usuario da conta
  * @param {number} money Dinheiro de usuario da conta
  * @param {number} level Nivel de usuario da conta
  * @author GuilhermeSantos
- * @version 1.0.0
+ * @version 1.0.1
  */
-function createAccount(email, password, username, money, level) {
+function createAccount(language, email, password, username, money, level) {
     mongoose.connect(uri, options, (err) => {
         if (err) {
             drawMessageServer('Não foi possivel conectar com o mongoDB', 'important');
@@ -305,6 +314,7 @@ function createAccount(email, password, username, money, level) {
 
     function mongooseConnected() {
         var user = new Schema_users({
+            language: String(language),
             email: String(email),
             password: LZString.compressToBase64(JsonEx.stringify(encryptJSON(String(password)))),
             username: String(username),
@@ -333,6 +343,7 @@ function createAccount(email, password, username, money, level) {
                             return mongoose.connection.close();
                         }
                         drawMessageServer(`Usuario com o email(${email}) salvo no banco de dados`, 'success');
+                        SMTPServer.sendEmail(email, language);
                         return mongoose.connection.close();
                     });
                 } else {
@@ -344,7 +355,7 @@ function createAccount(email, password, username, money, level) {
     }
 };
 
-//createAccount('exemple@hotmail.com', '12345678910', 'Gui', 123, 23);
+//createAccount('pt_br', 'exemple@hotmail.com', '12345678910', 'Gui', 123, 23);
 
 // var compressPassword = LZString.compressToBase64(JsonEx.stringify(encryptJSON('123')));
 // var decompressPassword = decryptJSON(JsonEx.parse(LZString.decompressFromBase64(compressPassword)));

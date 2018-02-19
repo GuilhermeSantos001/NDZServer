@@ -110,8 +110,6 @@ function onReady() {
 
 function loadServerModules() {
   require('./serverRequest');
-  require('./SMTPServer');
-  require('./mongodb');
 };
 
 //=============================================================================

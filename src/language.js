@@ -15,8 +15,8 @@ class LSTrict {
     /**
      * @description Adiciona o idioma para traduzir
      * 
-     * @param id {string} ID do elemento
-     * @param languages {{}} Textos e os idiomas
+     * @param {string} id ID do elemento
+     * @param {{}} languages Textos e os idiomas
      */
     addElement(id, languages) {
         this.elements.push({
@@ -46,7 +46,11 @@ class LSTrict {
      * 
      */
     definePageLanguage() {
-        var defaultPageLanguage = document.getElementById("translate_default").getAttribute("translateDefault");
+        if (document.getElementById("translate_default")) {
+            var defaultPageLanguage = document.getElementById("translate_default").getAttribute("translateDefault");
+        } else {
+            var defaultPageLanguage = null;
+        }
         if (typeof defaultPageLanguage === 'string' && defaultPageLanguage.length > 0) {
             return defaultPageLanguage;
         }

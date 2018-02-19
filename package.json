@@ -9,10 +9,10 @@
   },
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/GuilhermeSantos001/NDZServer"
   },
   "author": "GuilhermeSantos",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "body-parser": "^1.18.2",
     "cookie-parser": "^1.4.3",

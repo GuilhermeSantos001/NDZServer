@@ -47,41 +47,18 @@ const nodemailer = require('nodemailer');
 const drawMessageServer = require('./www.js').drawMessageServer;
 
 //=============================================================================
-// MODULOS DO SERVIDOR PRINCIPAL
-//=============================================================================
-/**
- * @description Se a conexão com o socket for estabelecida
- */
-serversIO.serverMainIO.on('connect', (socket) => {
-    // Cria a chamada para enviar um email
-    socket.on('sendEmail', (content) => {
-        if (!content && typeof content != 'string' ||
-            typeof content === 'string' && content.length <= 0) {
-            return drawMessageServer('Chamada para sendEmail resultou um erro, pois o parametro content não é uma string', 'errorImportant');
-        }
-        var emailContent = JSON.parse(LZString.decompressFromEncodedURIComponent(content)) || {};
-        var email = emailContent.email
-            , message = emailContent.message
-            , language = emailContent.language;
-        sendEmail(email, message, language);
-    });
-});
-
-//=============================================================================
 // MODULOS DO NODEMAILER
 //=============================================================================
 /**
  * @description Envia um email para o destinatario
  * @param {string} email Email do destinatario
- * @param {string} message Mensagem do documento
  * @param {string} language Idioma do destinatario
  * @author GuilhermeSantos
  * @version 1.0.0
  */
-function sendEmail(email, message, language) {
-
-    if (!email || !message || !language) {
-        return drawMessageServer(`Não é possivel enviar um email com essas configurações: ${email} ${message} ${language}`, 'error');
+function sendEmail(email, language) {
+    if (!email || !language) {
+        return drawMessageServer(`Não é possivel enviar um email com essas configurações: ${email} ${language}`, 'error');
     };
 
     // Cria um objeto transportador reutilizável usando o transporte SMTP padrão
@@ -94,12 +71,18 @@ function sendEmail(email, message, language) {
     //         pass: 'd2eddf7fa51937a801f5a9cc7bbe780e'
     //     }
     // });
+
+    // Transporte para teste
     const transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
+        host: 'smtp.ethereal.email', // Endereço do host
+        secure: false, // Usar certificado SSL
+        port: 587, // Porta do host
         auth: {
-            user: 'yys6bpxgij7fkht4@ethereal.email',
-            pass: 'Ux5AMt7PesuKP7Qp5N'
+            user: 'lf27h3xjybceaeey@ethereal.email',
+            pass: 'RTeHDyAxFqSPAPkF6n'
+        },
+        tls: {
+            rejectUnauthorized: false // Para não falhar em certificados inválidos
         }
     });
 
@@ -109,13 +92,11 @@ function sendEmail(email, message, language) {
         var html = `${TS[language].html[0]}`;
     } else {
         var subject = "Account created ✔";
-        var text = "Thanks for playing";
-        var html = `<b>You did the part of beta</b>`;
+        var text = "Thank you for register";
+        var html = `<b>You were part of the beta</b>`;
     }
 
-    html += `<br> ${message}`;
-
-    var contentHTML = `<img src="http://www.cursou.com.br/wp-content/uploads/2017/11/Curso-de-Desenvolvimento-Web.png"/><br>`
+    var contentHTML = `<img src="https://i.imgur.com/Ln4vpgb.png"><br>`
     html = (contentHTML += html);
     var toName = (function (string) {
         var i = 0;
@@ -144,10 +125,20 @@ function sendEmail(email, message, language) {
     // Envia o email com o objeto de transporte definido
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
-            return drawMessageServer('Não foi possivel enviar o email', 'successError');
+            drawMessageServer('Não foi possivel enviar o email', 'successError');
+            drawMessageServer(`Error: ${error}`, 'error');
+            drawMessageServer(`Info: ${info}`, 'log');
+            return transporter.close();
         }
         drawMessageServer('Email enviado com sucesso!', 'success');
         drawMessageServer(`Preview URL ${nodemailer.getTestMessageUrl(info)}`, 'alert');
-        transport.close();
+        transporter.close();
     });
+};
+
+//================================================================================
+// MODULO PARA EXPORTAR O SCRIPT
+//================================================================================
+module.exports = {
+    sendEmail: sendEmail
 };

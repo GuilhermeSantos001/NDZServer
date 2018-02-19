@@ -12,6 +12,128 @@
 </head>
 
 <body style="background-color:rgb(30, 30, 30);">
+  <!-- Tela de login -->
+  <div class="row">
+    <!-- LOGIN -->
+    <div id="window_login" class="modal">
+      <div class="modal-content">
+        <div class="col s12 white">
+          <blockquote id="window_login_text_01" class="center-align">
+            Faça seu cadastro para acessar o fórum
+          </blockquote>
+        </div>
+        <div class="col s12 white valign-wrapper">
+          <div class="row">
+            <div class="input-field col s12">
+              <i class="material-icons prefix">email</i>
+              <input id="login_icon_prefix_01" type="email" class="validate">
+              <label id="window_login_text_02" for="login_icon_prefix_01">Endereço de email</label>
+            </div>
+            <div class="input-field col s12">
+              <i class="material-icons prefix">lock_open</i>
+              <input id="login_icon_prefix_02" type="password">
+              <label id="window_login_text_03" for="login_icon_prefix_02">Sua senha</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a id="window_login_text_04" class="modal-action modal-close waves-effect waves-green btn-flat left">Registrar</a>
+        <a id="window_login_text_05" class="modal-action modal-close waves-effect waves-green btn-flat">Entrar</a>
+      </div>
+    </div>
+    <!-- REGISTER -->
+    <div id="window_register" class="modal">
+      <div class="modal-content">
+        <div class="col s12 white">
+          <blockquote id="window_register_text_01" class="center-align">
+            Crie seu cadastro para acessar o fórum
+          </blockquote>
+        </div>
+        <div class="col s12 white valign-wrapper">
+          <div class="row">
+            <div class="input-field col s12">
+              <i class="material-icons prefix">email</i>
+              <input id="register_icon_prefix_01" type="email" class="validate">
+              <label id="window_register_text_02" for="register_icon_prefix_01">Endereço de email</label>
+            </div>
+            <div class="input-field col s12">
+              <i class="material-icons prefix">account_box</i>
+              <input id="register_icon_prefix_02" type="text">
+              <label id="window_register_text_03" for="register_icon_prefix_02">Nome de usuário</label>
+            </div>
+            <div class="input-field col s12">
+              <i class="material-icons prefix">lock_outline</i>
+              <i id="register_icon_password_visibility" class="material-icons grey-text right tooltipped" data-position="top" data-tooltip="Visualizar a senha"
+                style="cursor: pointer;">visibility</i>
+              <input id="register_icon_prefix_03" type="password">
+              <label id="window_register_text_04" for="register_icon_prefix_03">Sua senha</label>
+            </div>
+            <div class="input-field col s12">
+              <i class="material-icons prefix">lock_open</i>
+              <input id="register_icon_prefix_04" type="password">
+              <label id="window_register_text_05" for="register_icon_prefix_04">Confirme sua senha</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a id="window_register_text_06" class="modal-action modal-close waves-effect waves-green btn-flat left">Voltar</a>
+        <a id="window_register_text_07" class="modal-action modal-close waves-effect waves-green btn-flat disabled">Confirmar</a>
+      </div>
+    </div>
+    <!-- PRELOADER -->
+    <div id="window_preloader" class="modal">
+      <div class="modal-content">
+        <div class="row">
+          <div class="col s12 white">
+            <div class="section">
+              <h4 id="window_preloader_text_01" class="blue-text center-align">Carregando</h4>
+              <div class="divider blue"></div>
+            </div>
+            <div class="section">
+              <div class="center-align">
+                <div class="preloader-wrapper big active">
+                  <div class="spinner-layer spinner-blue-only">
+                    <div class="circle-clipper left">
+                      <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                      <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                      <div class="circle"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- CONTA CRIADA -->
+    <div id="window_accountCreated" class="modal">
+      <div class="modal-content">
+        <div class="row">
+          <div class="col s12 white">
+            <div class="section">
+              <h5 id="window_accountCreated_text_01" class="blue-text center-align">
+                Verifique seu endereço de e-mail para confirmar seu cadastro!
+              </h5>
+              <div class="divider blue"></div>
+              <h5 id="window_accountCreated_text_email" class="blue-text center-align">
+                email@hotmail.com
+              </h5>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a id="window_accountCreated_button_01" class="modal-action modal-close waves-effect waves-green btn-flat">Ok!</a>
+      </div>
+    </div>
+  </div>
   <!--Import jQuery before materialize.js-->
   <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
   <script type="text/javascript" src="js/materialize.min.js"></script>
@@ -21,7 +143,8 @@
   <script type="text/javascript" src="js/lib/JsonEx.js"></script>
   <script type="text/javascript" src="js/lib/lz-string.js"></script>
   <!-- Scripts -->
-  <script type="text/javascript" src="scripts/nameFile.js"></script>
+  <script type="text/javascript" src="scripts/requestLS.js"></script>
+  <script type="text/javascript" src="scripts/requestLogin.js"></script>
 </body>
 
 </html>
