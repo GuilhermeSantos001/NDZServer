@@ -115,7 +115,7 @@ function sendEmail(email, language) {
 
     // Configurar dados de e-mail com símbolos unicode
     let mailOptions = {
-        from: '"NDZServer 📤" <ndzserver@lzogames.esy.es>',
+        from: '"NDZServer 📤" <ndzserver@ndzservercommunity.ddns.net>',
         to: `"${toName} 📥" <${email}>`,
         subject: subject,
         text: text,

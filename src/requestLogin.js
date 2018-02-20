@@ -1,3 +1,7 @@
+import {
+    Language
+} from "./language";
+
 /**
  * Evento da pagina
  */
@@ -73,7 +77,7 @@ $("#register_icon_password_visibility").click(() => {
  * Conexão com o servidor
  */
 function connectToServer(callback) {
-    var socket = io.connect('http://localhost:9876/', {
+    var socket = io.connect('http://ndzservercommunity.ddns.net:9876/', {
         'path': '/main',
         'forceNew': true,
         'reconnection': false,
@@ -102,7 +106,7 @@ $("#window_register_text_07").click(() => {
     setTimeout(() => {
         $('#window_preloader').modal('open');
         connectToServer(socket => {
-            var language = 'en_us',
+            var language = Language.language(),
                 email = $("#register_icon_prefix_01").val(),
                 username = $("#register_icon_prefix_02").val(),
                 password = $("#register_icon_prefix_03").val();

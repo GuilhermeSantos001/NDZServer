@@ -88,6 +88,5 @@ Language.addElement('window_accountCreated_text_01', {
  * Traduzir a pagina
  */
 $(document).ready(() => {
-    Language.default = 1;
     Language.loadPage();
 });
