@@ -1,0 +1,9 @@
+{
+    "host": "smtp.ethereal.email",
+    "port": 587,
+    "secure": false,
+    "user": "lf27h3xjybceaeey@ethereal.email",
+    "pass": "RTeHDyAxFqSPAPkF6n",
+    "emailFromName": "NDZServer",
+    "emailFrom": "ndzserver@ndzservercommunity.ddns.net"
+}

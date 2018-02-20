@@ -12,7 +12,7 @@
     "url": "https://github.com/GuilhermeSantos001/NDZServer"
   },
   "author": "GuilhermeSantos",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "dependencies": {
     "body-parser": "^1.18.2",
     "cookie-parser": "^1.4.3",
