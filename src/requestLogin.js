@@ -17,9 +17,17 @@
  *
  *   To enter in contact with the developer <luizgp120@hotmail.com>
  */
+
+/**
+ * Importa os modulos
+ */
 import {
     Language
 } from "./language";
+
+import LZString from "./lz-string";
+
+import JsonEx from "./JsonEx";
 
 /**
  * Evento da pagina
@@ -37,7 +45,7 @@ $(document).ready(() => {
 });
 
 $("#register_icon_prefix_01").focusout(() => {
-    btnConfirmIsValid();
+    emailCheckedServer();
 });
 
 $("#register_icon_prefix_02, \
@@ -71,6 +79,9 @@ function btnConfirmIsValid() {
         username = $("#register_icon_prefix_02").hasClass('valid'),
         password = $("#register_icon_prefix_03").hasClass('valid'),
         password_confirm = $("#register_icon_prefix_04").hasClass('valid');
+    if ($("#register_icon_prefix_01").hasClass('checkedEmailServer')) {
+        return $("#window_register_text_07").addClass('disabled');
+    }
     if (email && username && password && password_confirm) {
         $("#window_register_text_07").removeClass('disabled');
     } else {
@@ -129,7 +140,7 @@ $("#window_register_text_07").click(() => {
                 email = $("#register_icon_prefix_01").val(),
                 username = $("#register_icon_prefix_02").val(),
                 password = $("#register_icon_prefix_03").val();
-            var content = LZString.compressToEncodedURIComponent(JsonEx.stringify({
+            var content = LZString().compressToEncodedURIComponent(JsonEx().stringify({
                 language: language,
                 email: email,
                 password: password,
@@ -141,7 +152,7 @@ $("#window_register_text_07").click(() => {
             socket.disconnect();
             $("#window_accountCreated_text_email").text(email);
             setTimeout(() => {
-                $('#window_preloader').modal('close');
+                $('#window_preloader').modal('destroy');
                 setTimeout(() => {
                     $('#window_accountCreated').modal('open');
                 }, 350)
@@ -155,3 +166,37 @@ $("#window_accountCreated_button_01").click(() => {
         $('#window_login').modal('open');
     }, 350);
 });
+
+function emailCheckedServer() {
+    connectToServer(socket => {
+        var email = $("#register_icon_prefix_01").val(),
+            socketId = String(socket.id);
+        var content = LZString().compressToEncodedURIComponent(JsonEx().stringify({
+            email: email,
+            socketId: socketId
+        }));
+        socket.emit('emailAlreadyUsed', content);
+        socket.on('eventPage_emailChecked', content => {
+            content = JsonEx().parse(LZString().decompressFromEncodedURIComponent(content));
+            var email = Boolean(content.email),
+                socketId = String(content.socketId),
+                language = String(content.language);
+            if (email && String(socket.id) == socketId) {
+                $("#register_icon_prefix_01").addClass('invalid checkedEmailServer');
+                $("#icon_page_email_01").addClass('red-text');
+                if (language == 'pt_br') {
+                    Materialize.toast('Já existe uma conta com este endereço de email!', 3500, 'rounded');
+                } else if (language == 'en_us') {
+                    Materialize.toast('An account already exists with this email address!', 3500, 'rounded');
+                }
+            } else {
+                if ($("#register_icon_prefix_01").hasClass('checkedEmailServer')) {
+                    $("#register_icon_prefix_01").removeClass('invalid checkedEmailServer');
+                    $("#icon_page_email_01").removeClass('red-text');
+                }
+            }
+            btnConfirmIsValid();
+            socket.disconnect();
+        });
+    });
+};

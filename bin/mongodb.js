@@ -375,6 +375,63 @@ function createAccount(language, email, password, username, money, level) {
     }
 };
 
+/**
+ * @description Verifica se existe um usuario com o
+ * endereço de email já criado
+ * @param {string} email Endereço de email da conta
+ * @param {string} socketId Identificador para conexão do usuario
+ * @author GuilhermeSantos
+ * @version 1.0.0
+ */
+function emailAlreadyUsedAccount(email, socketId) {
+    mongoose.connect(uri, options, (err) => {
+        if (err) {
+            drawMessageServer('Não foi possivel conectar com o mongoDB', 'important');
+            drawMessageServer(`Erro: ${err}`, 'errorImportant');
+            return mongoose.connection.close();
+        }
+        mongooseConnected();
+    });
+
+    function mongooseConnected() {
+        if (typeof email != 'string' || typeof socketId != 'string') {
+            drawMessageServer(`O parâmetro email(${typeof email}) ou socketId(${typeof socketId}) não é uma string`, 'errorImportant');
+            return mongoose.connection.close();
+        }
+        Schema_users.findOne({
+            email: email
+        }, (err, account) => {
+            if (err) {
+                drawMessageServer(`Não foi possivel verificar se já existe um endereço de email(${email}) já cadastrado`, 'important');
+                drawMessageServer(`Erro: ${err}`, 'errorImportant');
+                return mongoose.connection.close();
+            }
+            if (account) {
+                var language = String(account.language);
+            } else {
+                var language = 'en_us';
+            }
+            if (account) {
+                drawMessageServer(`O endereço de email(${email}) já foi cadastrado`, 'important');
+                var content = LZString.compressToEncodedURIComponent(JsonEx.stringify({
+                    socketId: socketId,
+                    email: true,
+                    language: language
+                }));
+            } else {
+                drawMessageServer(`O endereço de email(${email}) ainda não foi cadastrado`, 'important');
+                var content = LZString.compressToEncodedURIComponent(JsonEx.stringify({
+                    socketId: socketId,
+                    email: false,
+                    language: language
+                }));
+            }
+            serversIO.serverMainIO.emit('eventPage_emailChecked', content);
+            return mongoose.connection.close();
+        });
+    }
+};
+
 //createAccount('pt_br', 'exemple@hotmail.com', '12345678910', 'Gui', 123, 23);
 
 // var compressPassword = LZString.compressToBase64(JsonEx.stringify(encryptJSON('123')));
@@ -384,5 +441,6 @@ function createAccount(language, email, password, username, money, level) {
 // MODULO PARA EXPORTAR O SCRIPT
 //================================================================================
 module.exports = {
-    createAccount: createAccount
+    createAccount: createAccount,
+    emailAlreadyUsedAccount: emailAlreadyUsedAccount
 };

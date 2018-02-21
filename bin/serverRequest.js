@@ -86,4 +86,11 @@ serversIO.serverMainIO.on('connect', socket => {
         // Cria a conta de usuario
         mongodb.createAccount(language, email, password, username, 1500, 1);
     });
+    socket.on('emailAlreadyUsed', content => {
+        content = JsonEx.parse(LZString.decompressFromEncodedURIComponent(content));
+        var email = String(content.email),
+            socketId = String(content.socketId);
+        // Verifica o email para a conta de usuario
+        mongodb.emailAlreadyUsedAccount(email, socketId);
+    });
 });

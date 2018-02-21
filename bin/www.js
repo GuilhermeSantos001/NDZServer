@@ -27,7 +27,7 @@ var http = require('http');
 
 /** 
  * Configurações do servidor
-*/
+ */
 var config = require('../configs/server');
 const serverConfig = {
   port: Number(config["port"]) || 9876,
@@ -146,16 +146,16 @@ function welcomeMessageServer(CClear) {
   if (CClear) console.clear();
   console.log("/////////////////////////////////////////////////////////////////////////////////");
   console.log("//                                                                             //");
-  console.log(`//  SERVER: NDZServer v1.0.2                                                   //`);
-  console.log("//  LICENSE: MIT                                                               //");
-  console.log("//  DEVELOPER: GuilhermeSantos                                                 //");
+  console.log(`//  SERVER: NDZServer v1.0.4                                                   //`);
+  console.log("//  LICENSE: GPL-3.0                                                           //");
+  console.log("//  DEVELOPER: GuilhermeSantos001                                              //");
   console.log("//  REPOSITORY: GIT https://github.com/GuilhermeSantos001/NDZServer            //");
   console.log("//                                                                             //");
-  console.log("//                              GuilhermeSantos                                //");
-  console.log("//             (c) 2018 GuilhermeSantos. Todos os direitos reservados.         //");
+  console.log("//                              GuilhermeSantos001                             //");
+  console.log("//             (c) 2018 GuilhermeSantos001. Todos os direitos reservados.      //");
   console.log("/////////////////////////////////////////////////////////////////////////////////");
   console.log("");
-  drawMessageServer('Servidor executando em http://localhost:'+serverConfig.port+'/', "alert");
+  drawMessageServer('Servidor executando em http://localhost:' + serverConfig.port + '/', "alert");
 };
 
 /**
