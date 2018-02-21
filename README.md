@@ -21,6 +21,9 @@
 
 - Você pode acompanhar a [documentação](https://github.com/GuilhermeSantos001/NDZServer/wiki) para aprender mais sobre o NDZServer
 
+# Criação do nome
+> Now do Zillions of Servers - NDZServer. Esse servidor nasceu da criação do meu antigo jogo online, enquanto estava programando percebi que existia infinitas possibilidades de melhorar o servidor.
+
 # Idioma
 > O NDZServer é totalmente feito em Português-BR.
 
