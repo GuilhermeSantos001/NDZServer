@@ -26,27 +26,32 @@ import {
  */
 Language.addElement('window_login_text_01', {
     'pt_br': 'Faça seu cadastro para acessar o fórum',
-    'en_us': 'Make your registration to access the forum'
+    'en_us': 'Make your registration to access the forum',
+    'es': 'Haga su registro para acceder al foro'
 });
 
 Language.addElement('window_login_text_02', {
-    'pt_br': 'Endereço de e-mail',
-    'en_us': 'Email address'
+    'pt_br': 'Endereço de email',
+    'en_us': 'Email address',
+    'es': 'Dirección de email'
 });
 
 Language.addElement('window_login_text_03', {
     'pt_br': 'Sua senha',
-    'en_us': 'Your password'
+    'en_us': 'Your password',
+    'es': 'Tu contraseña'
 });
 
 Language.addElement('window_login_text_04', {
     'pt_br': 'Registrar',
-    'en_us': 'Register'
+    'en_us': 'Register',
+    'es': 'Registrar'
 });
 
 Language.addElement('window_login_text_05', {
     'pt_br': 'Entrar',
-    'en_us': 'Enter'
+    'en_us': 'Enter',
+    'es': 'Entrar'
 });
 
 /**
@@ -54,37 +59,44 @@ Language.addElement('window_login_text_05', {
  */
 Language.addElement('window_register_text_01', {
     'pt_br': 'Crie seu cadastro para acessar o fórum',
-    'en_us': 'Create your registration to access the forum'
+    'en_us': 'Create your registration to access the forum',
+    'es': 'Crear su registro para acceder al foro'
 });
 
 Language.addElement('window_register_text_02', {
     'pt_br': 'Endereço de email',
-    'en_us': 'Email address'
+    'en_us': 'Email address',
+    'es': 'Dirección de correo electrónico'
 });
 
 Language.addElement('window_register_text_03', {
     'pt_br': 'Nome de usuário',
-    'en_us': 'Username'
+    'en_us': 'Username',
+    'es': 'Nombre del usuario'
 });
 
 Language.addElement('window_register_text_04', {
     'pt_br': 'Sua senha',
-    'en_us': 'Your password'
+    'en_us': 'Your password',
+    'es': 'Tu contraseña'
 });
 
 Language.addElement('window_register_text_05', {
     'pt_br': 'Confirme sua senha',
-    'en_us': 'Confirm your password'
+    'en_us': 'Confirm your password',
+    'es': 'Confirme su contraseña'
 });
 
 Language.addElement('window_register_text_06', {
     'pt_br': 'Voltar',
-    'en_us': 'Return'
+    'en_us': 'Return',
+    'es': 'Regresar'
 });
 
 Language.addElement('window_register_text_07', {
     'pt_br': 'Confirmar',
-    'en_us': 'Confirm'
+    'en_us': 'Confirm',
+    'es': 'Confirmar'
 });
 
 /**
@@ -92,7 +104,8 @@ Language.addElement('window_register_text_07', {
  */
 Language.addElement('window_preloader_text_01', {
     'pt_br': 'Carregando',
-    'en_us': 'Loading'
+    'en_us': 'Loading',
+    'es': 'Cargando'
 });
 
 /**
@@ -100,12 +113,22 @@ Language.addElement('window_preloader_text_01', {
  */
 Language.addElement('window_accountCreated_text_01', {
     'pt_br': 'Verifique seu endereço de e-mail para confirmar seu cadastro',
-    'en_us': 'Verify your email address to confirm your registration'
+    'en_us': 'Verify your email address to confirm your registration',
+    'es': 'Compruebe su correo electrónico para confirmar tu registro'
+});
+
+/**
+ * Tooltips da pagina
+ */
+Language.addAttribute('register_icon_password_visibility', 'data-tooltip', {
+    'pt_br': 'Visualizar a senha',
+    'en_us': 'View the password',
+    'es': 'Ver la contraseña'
 });
 
 /**
  * Traduzir a pagina
  */
-$(document).ready(() => {
+$(window).on('load', () => {
     Language.loadPage();
 });

@@ -19,8 +19,8 @@
  */
 class LSTrict {
     constructor() {
-        this.languages = ["en_us", "pt_br"];
-        this.default = 0;
+        this.languages = ["en_us", "pt_br", 'es'];
+        this.default = 2;
         this.elements = [];
     };
 
@@ -32,7 +32,7 @@ class LSTrict {
     };
 
     /**
-     * @description Adiciona o idioma para traduzir
+     * @description Adiciona o elemento para traduzir
      * 
      * @param {string} id ID do elemento
      * @param {{}} languages Textos e os idiomas
@@ -40,7 +40,7 @@ class LSTrict {
     addElement(id, languages) {
         this.elements.push({
             getElementById: function () {
-                return document.getElementById(id)
+                return document.getElementById(id);
             },
             getElementText: function (language) {
                 if (languages[language]) {
@@ -56,6 +56,39 @@ class LSTrict {
             translate: function (element, text) {
                 if (element)
                     element.textContent = text;
+            }
+        });
+    };
+
+    /**
+     * @description Adiciona o atributo para traduzir
+     * 
+     * @param {string} id ID do elemento
+     * @param {string} attribute Nome do atributo
+     * @param {{}} languages Textos e os idiomas
+     */
+    addAttribute(id, attribute, languages) {
+        this.elements.push({
+            getElementById: function () {
+                return document.getElementById(id);
+            },
+            getElementText: function (language) {
+                if (languages[language]) {
+                    var text = languages[language];
+                    if (typeof text != 'string') {
+                        text = null;
+                    } else if (typeof text == 'string' && text.length <= 0) {
+                        text = null;
+                    }
+                }
+                return text || '???';
+            },
+            translate: function (element, text) {
+                if (element) {
+                    if (element.hasAttribute(attribute)) {
+                        element.setAttribute(attribute, text);
+                    }
+                }
             }
         });
     };
