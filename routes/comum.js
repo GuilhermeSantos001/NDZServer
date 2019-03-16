@@ -21,7 +21,7 @@
 var express = require('express');
 var router = express.Router();
 
-// Define a rota não existente
+// Define a rota que não existente
 router.use('*', (req, res) => {
     res.status(404).send('404 - Not Found!!!');
 });
