@@ -2,7 +2,7 @@
 > Para trabalhar com o NDZServer você precisa dominar o javascript, não se preocupe use a documentação e vai ficar tudo bem ;)
 
 # NDZServer
-> Servidor para criação de uma comunidade segura e inovadora. NDZServer utiliza o socket.io para estabelecer diversas conexões. A utilização do MongoDB para uma organização moderna. Criar uma comunidade agora é divertido com o NDZServer, experimente agora!
+> NDZServer utiliza o socket.io para estabelecer diversas conexões. A utilização do MongoDB para uma organização moderna.
 
 # Como instalar
 > Para instalar o NDZServer você precisa do **node.js**, **Git**, **mongoDB** e um servidor **SMTP**
@@ -34,8 +34,6 @@
 
 # Doar
 > Você pode me doar algum dinheiro como forma de agradecimento pelo meu esforço em desenvolver o servidor.
-
-- Irei criar o **patreon**
 
 # Agradecimentos
 > Quero deixar meus agradecimentos a todas as equipes que desenvolveram as dependências do projeto, vocês tornaram isso possível!!!
